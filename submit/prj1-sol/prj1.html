@@ -1,0 +1,628 @@
+<!DOCTYPE html>
+<html lang="en-US">
+  <head>
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <link href="../../assets/styles/article.css" rel="stylesheet" type="text/css" /> 
+    <title>CS 544: Project 1</title>
+    <link href="prj1/hl-fine_blue.css" rel="stylesheet"/>
+  </head>
+  <body>
+    <nav>
+      <ul>
+	<li><a href="../../index.html" class="material-icons">house</a></li>
+	<li><a href="../../docs/index.html">Docs</a></li>
+	<li><a href="../../exercises/index.html">Exercises</a></li>
+	<li><a href="../../hws/index.html">Homeworks</a></li>
+	<li><a href="../../misc/index.html">Misc</a></li>
+	<li><a href="../../projects/index.html">Projects</a></li>
+	<li><a href="../../slides/index.html">Slides</a></li>
+	<li><a id="loginAction"></a></li>
+      </ul>
+    </nav>
+    <div class="content">
+      <section data-coord="prj1.umt:1:0"><h1 data-coord="prj1.umt:1:0">Project 1</h1><p data-coord="prj1.umt:3:0"><strong data-coord="prj1.umt:3:0">Due</strong>: Jun 30 by 11:59p
+</p><p data-coord="prj1.umt:5:0"><strong data-coord="prj1.umt:5:0">Important Reminder</strong>: As per the course <em data-coord="prj1.umt:5:110"><a href="../../misc/academic-honesty-statement/academic-honesty-policy.html" data-coord="prj1.umt:5:110">Academic Honesty Statement</a></em>,
+cheating of any kind will minimally result in your letter grade
+for the entire course being reduced by one level.
+</p><p data-coord="prj1.umt:9:0">This document first provides the aims of this project.  It then lists
+the requirements as explicitly as possible.  This is followed by a log
+which should help you understand the requirements.  Finally, it
+provides some hints as to how those requirements can be met.
+</p><p data-coord="prj1.umt:14:0">[Please note that intra-document links do not work within the
+PDF version of this document.]
+</p><section data-coord="prj1.umt:17:0"><h2 data-coord="prj1.umt:17:0">Aims</h2><p data-coord="prj1.umt:20:0">The aims of this project are as follows:
+</p><ul data-coord="prj1.umt:22:0"><li data-coord="prj1.umt:22:0"><p data-coord="prj1.umt:22:4">To ensure that you have set up your VM as specified in the
+<em data-coord="prj1.umt:22:104"><a href="../../misc/vm-setup/vm-setup.html" data-coord="prj1.umt:22:104">VM Setup</a></em> and
+<em data-coord="prj1.umt:22:162"><a href="../../misc/git-setup/git-setup.html" data-coord="prj1.umt:22:162">Git Setup</a></em>
+documents.
+</p></li><li data-coord="prj1.umt:27:0"><p data-coord="prj1.umt:27:4">To get you to write a non-trivial JavaScript program.
+</p></li><li data-coord="prj1.umt:29:0"><p data-coord="prj1.umt:29:4">To give you some exposure to using <samp data-coord="prj1.umt:29:39">webpack</samp>.
+</p></li><li data-coord="prj1.umt:31:0"><p data-coord="prj1.umt:31:4">To familiarize you with manipulating the DOM using jquery.
+</p></li></ul></section><section data-coord="prj1.umt:33:0"><h2 data-coord="prj1.umt:33:0">How To Read This Document</h2><p data-coord="prj1.umt:36:0">This document is rather long as it attempts to specify the project in
+detail and also provide step-by-step instructions. Hence it is not a
+good idea to attempt to understand the document in detail initially.
+</p><ol data-coord="prj1.umt:40:0"><li data-coord="prj1.umt:40:0"><p data-coord="prj1.umt:40:4">Read the following <strong data-coord="prj1.umt:40:23">Background</strong> section thoroughly.
+</p></li><li data-coord="prj1.umt:42:0"><p data-coord="prj1.umt:42:4">Scan through the rest of the document so that you understand what
+kind of information is provided and know where to find it.
+</p></li><li data-coord="prj1.umt:45:0"><p data-coord="prj1.umt:45:4">Run the working <a href="extras/bin" data-coord="prj1.umt:45:34">application</a> and relate the displayed
+content with the provided <a href="prj1-sol/src/meta.js?colorize=true" data-coord="prj1.umt:45:143">meta.js.</a>
+</p></li><li data-coord="prj1.umt:49:0"><p data-coord="prj1.umt:49:4">Look at the <em data-coord="prj1.umt:49:28"><a href="prj1-sol" data-coord="prj1.umt:49:28">provided code</a></em> in detail.
+</p></li><li data-coord="prj1.umt:51:0"><p data-coord="prj1.umt:51:4">Start working on the project, and refer back to details provided
+in different parts of the document as needed.
+</p></li></ol></section><section data-coord="prj1.umt:55:0"><h2 data-coord="prj1.umt:55:0">Background</h2><p data-coord="prj1.umt:58:0">Instead of writing web forms directly in HTML, it is possible to
+represent them using a JavaScript data structure and then directly
+write the corresponding DOM objects into the DOM.  For example, a
+simple google search form could be represented as:
+</p><pre>      <span class="hl opt">{</span> type<span class="hl opt">:</span> <span class="hl str">&apos;form&apos;</span><span class="hl opt">,</span>
+        attr<span class="hl opt">: {</span> action<span class="hl opt">:</span> <span class="hl str">&apos;https://www.google.com/search&apos;</span><span class="hl opt">, },</span>
+        items<span class="hl opt">: [</span>
+          <span class="hl opt">{</span> type<span class="hl opt">:</span> <span class="hl str">&apos;input&apos;</span><span class="hl opt">,</span>
+            text<span class="hl opt">:</span> <span class="hl str">&apos;Search Terms&apos;</span><span class="hl opt">,</span>
+            attr<span class="hl opt">: {</span>
+              name<span class="hl opt">:</span> <span class="hl str">&apos;q&apos;</span><span class="hl opt">,</span>
+              title<span class="hl opt">:</span> <span class="hl str">&quot;enter search terms&quot;</span><span class="hl opt">,</span>
+            <span class="hl opt">},</span>
+            required<span class="hl opt">:</span> <span class="hl kwa">true</span><span class="hl opt">,</span>
+          <span class="hl opt">},</span>
+          <span class="hl opt">{</span> type<span class="hl opt">:</span> <span class="hl str">&apos;submit&apos;</span><span class="hl opt">,</span> text<span class="hl opt">:</span> <span class="hl str">&apos;Search Google&apos;</span><span class="hl opt">, },</span>
+        <span class="hl opt">],</span>
+      <span class="hl opt">}</span></pre><p data-coord="prj1.umt:80:0">which would generate DOM objects <strong data-coord="prj1.umt:80:33">equivalent</strong> to the following HTML:
+</p><pre><span class="hl kwa">&lt;form</span> <span class="hl kwb">action</span>=<span class="hl str">&quot;https://www.google.com/search&quot;</span><span class="hl kwa">&gt;</span>
+  <span class="hl kwa">&lt;label</span> <span class="hl kwb">for</span>=<span class="hl str">&quot;/googleSearch/items/1/items/0&quot;</span><span class="hl kwa">&gt;</span>
+    Search Terms
+  <span class="hl kwa">&lt;/label&gt;</span>
+  <span class="hl kwa">&lt;div&gt;</span>
+    <span class="hl kwa">&lt;input</span> <span class="hl kwb">name</span>=<span class="hl str">&quot;q&quot;</span> <span class="hl kwb">title</span>=<span class="hl str">&quot;enter search terms&quot;</span> <span class="hl kwb">type</span>=<span class="hl str">&quot;text&quot;</span>
+           <span class="hl kwb">id</span>=<span class="hl str">&quot;/googleSearch/items/1/items/0&quot;</span><span class="hl kwa">/&gt;</span>
+    <span class="hl kwa">&lt;div</span> <span class="hl kwb">class</span>=<span class="hl str">&quot;error&quot;</span>
+         <span class="hl kwb">id</span>=<span class="hl str">&quot;/googleSearch/items/1/items/0-err&quot;</span><span class="hl kwa">&gt;&lt;/div&gt;</span>
+    <span class="hl kwa">&lt;div&gt;&lt;/div&gt;</span>
+    <span class="hl kwa">&lt;button</span> <span class="hl kwb">type</span>=<span class="hl str">&quot;submit&quot;</span><span class="hl kwa">&gt;</span>Search Google<span class="hl kwa">&lt;/button&gt;</span>
+  <span class="hl kwa">&lt;/div&gt;</span>
+<span class="hl kwa">&lt;/form&gt;</span></pre><p data-coord="prj1.umt:99:0">The data structure is much less verbose than the HTML.  More importantly,
+it is much easier to build up dynamically.
+</p><p data-coord="prj1.umt:102:0">The conversion can be done using a templating system like
+<a href="https://mustache.github.io/" data-coord="prj1.umt:102:89">mustache</a> or
+<a href="https://reactjs.org/docs/getting-started.html" data-coord="prj1.umt:102:150">reactjs.</a>  This
+project takes a different approach and generates the DOM objects
+directly in the document's DOM using jquery.  Note that HTML is never
+explicitly generated; only the corresponding DOM objects are created.
+</p></section><section data-coord="prj1.umt:110:0"><h2 data-coord="prj1.umt:110:0">Requirements</h2><p data-coord="prj1.umt:114:0">You must push a <samp data-coord="prj1.umt:114:16">submit/prj1-sol</samp> directory to your <samp data-coord="prj1.umt:114:52">master</samp> branch in
+your github repository such that typing <samp data-coord="prj1.umt:114:111">npm ci</samp> followed by <samp data-coord="prj1.umt:114:132">npm run
+start</samp> within that directory starts a server.  Accessing that server
+using a browser should display a default page with content as
+specified by <a href="prj1-sol/src/meta.js?colorize=true" data-coord="prj1.umt:114:323">meta.js.</a>  The
+behavior of your program is illustrated <a href="extras/bin" data-coord="prj1.umt:114:391">here.</a>
+</p><p data-coord="prj1.umt:121:0">The detailed requirements for the code are quite long.  Hence
+we first list some auxiliary requirements to ensure that they
+do not get buried under the lengthy main requirements:
+</p><ol data-coord="prj1.umt:125:0"><li data-coord="prj1.umt:125:0"><p data-coord="prj1.umt:125:4">Your <samp id="vm" data-coord="prj1.umt:125:15">submit/prj1-sol</samp> directory <strong data-coord="prj1.umt:125:43">must</strong> also contain a
+<samp data-coord="prj1.umt:125:69">vm.png</samp> image file to verify that you have set up your VM
+correctly.  Specifically, the image must show a x2go client window
+running your VM.  The captured x2go window must show a terminal
+window containing the output of the following commands:
+</p><pre>    $ hostname<span class="hl opt">;</span> hostname <span class="hl kwb">-I</span>
+    $ <span class="hl kwc">ls</span> ~<span class="hl opt">/</span>projects
+    $ <span class="hl kwc">ls</span> ~<span class="hl opt">/</span>cs544
+    $ <span class="hl kwc">ls</span> ~<span class="hl opt">/</span>i?<span class="hl num">44</span>
+    $ crontab <span class="hl kwb">-l</span> | <span class="hl kwc">tail</span> <span class="hl kwb">-3</span></pre></li><li data-coord="prj1.umt:140:0"><p data-coord="prj1.umt:140:4">You may not use any external runtime libraries other than
+jquery.
+</p></li><li data-coord="prj1.umt:143:0"><p data-coord="prj1.umt:143:4">There is no requirement that you check whether the <samp data-coord="prj1.umt:143:55">meta.js</samp>
+input is error-free.
+</p></li></ol><p data-coord="prj1.umt:147:0">Now for the detailed main requirements. 
+</p><p data-coord="prj1.umt:149:0">The project should be set up to display a page corresponding
+to <samp data-coord="prj1.umt:149:64">Meta[ref]</samp> where <samp data-coord="prj1.umt:149:82">Meta</samp> is the object exported by
+<samp data-coord="prj1.umt:149:115">meta.js</samp> and <samp data-coord="prj1.umt:149:129">ref</samp> is the value of the <samp data-coord="prj1.umt:149:155">ref</samp> query parameter
+for the page URL.  If <samp data-coord="prj1.umt:149:199">ref</samp> is not specified, then it should
+default to <samp data-coord="prj1.umt:149:249">_</samp>.
+</p><p data-coord="prj1.umt:155:0"><span id="types" data-coord="prj1.umt:155:9">We</span> specify the different kinds of content using a semi-formal
+notation.  The descriptions below are organized in order of increasing
+complexity.  Note that property names are used consistently across
+multiple <samp data-coord="prj1.umt:155:218">type</samp>'s; hence the explanation for a property is not
+repeated when it is used subsequently.
+</p><p data-coord="prj1.umt:161:0">We use <samp data-coord="prj1.umt:161:7">Content</samp> to represent arbitrary content generated by the
+system.  The different kinds of content are identified using a <samp data-coord="prj1.umt:161:128">type</samp>
+property which defaults to <samp data-coord="prj1.umt:161:162">block</samp>.
+</p><ul data-coord="prj1.umt:166:0"><li data-coord="prj1.umt:166:0"><p data-coord="prj1.umt:166:4">One of the simplest kind of content is a <strong data-coord="prj1.umt:166:45">block</strong>:
+</p><pre>    <span class="hl opt">{</span> type<span class="hl opt">:</span> <span class="hl str">&apos;block&apos;</span><span class="hl opt">,</span> attr<span class="hl opt">:</span> Attr<span class="hl opt">,</span> items<span class="hl opt">:</span> List<span class="hl opt">&lt;</span>Content<span class="hl opt">&gt;, }</span>
+    <span class="hl opt">=&gt; &lt;</span>div attr<span class="hl opt">&gt;=</span>items<span class="hl opt">=&lt;/</span>div<span class="hl opt">&gt;</span></pre><p data-coord="prj1.umt:173:4">The above notation means that in <samp data-coord="prj1.umt:173:37">meta.js</samp>, a block would be
+represented as a hash with a required <samp data-coord="prj1.umt:173:107">type</samp> property with value
+<samp data-coord="prj1.umt:173:138">block</samp>, an optional <samp data-coord="prj1.umt:173:159">attr</samp> property which is a map of attribute
+names to values and an <samp data-coord="prj1.umt:173:230">items</samp> property which is a list of
+<samp data-coord="prj1.umt:173:270">Content</samp>.
+</p><p data-coord="prj1.umt:179:4">The <samp data-coord="prj1.umt:179:8">=&gt;</samp> separates the input specification from the HTML which is
+equivalent to the generated objects.  In this case, the generated
+objects should consist of a <samp data-coord="prj1.umt:179:172">div</samp> element with attributes
+specified by the input <samp data-coord="prj1.umt:179:229">attr</samp> map and content which is a recursive
+expansion of the list of items.
+</p><p data-coord="prj1.umt:185:4">If a content description does not have a <samp data-coord="prj1.umt:185:45">type</samp> property, then
+the <samp data-coord="prj1.umt:185:75">type</samp> defaults to <samp data-coord="prj1.umt:185:94">block</samp>.
+</p></li><li data-coord="prj1.umt:188:0"><p data-coord="prj1.umt:188:4">We have a similar specification for a paragraph with type <strong data-coord="prj1.umt:188:62">para</strong>:
+</p><pre>    <span class="hl opt">{</span> type<span class="hl opt">:</span> <span class="hl str">&apos;para&apos;</span><span class="hl opt">,</span> attr<span class="hl opt">:</span> Attr<span class="hl opt">,</span> items<span class="hl opt">:</span> List<span class="hl opt">&lt;</span>Content<span class="hl opt">&gt;, }</span>
+    <span class="hl opt">=&gt; &lt;</span>p attr<span class="hl opt">&gt;=</span>items<span class="hl opt">=&lt;/</span>p<span class="hl opt">&gt;</span></pre></li><li data-coord="prj1.umt:195:0"><p data-coord="prj1.umt:195:4">A text <strong data-coord="prj1.umt:195:11">segment</strong> contains an arbitrary <samp data-coord="prj1.umt:195:43">String</samp> or a recursive
+expansion of <samp data-coord="prj1.umt:195:84">items</samp>.
+</p><pre>    <span class="hl opt">{</span> type<span class="hl opt">:</span> <span class="hl str">&apos;segment&apos;</span><span class="hl opt">,</span> attr<span class="hl opt">:</span> Attr<span class="hl opt">,</span> text<span class="hl opt">:</span> String<span class="hl opt">,</span> items<span class="hl opt">:</span> List<span class="hl opt">&lt;</span>Content<span class="hl opt">&gt;, }</span>
+    <span class="hl opt">=&gt;</span> <span class="hl kwa">if</span> text is present
+       then
+         <span class="hl opt">&lt;</span>span attr<span class="hl opt">&gt;</span>text<span class="hl opt">&lt;/</span>span<span class="hl opt">&gt;</span>
+       <span class="hl kwa">else</span>
+         <span class="hl opt">&lt;</span>span attr<span class="hl opt">&gt;=</span>items<span class="hl opt">=&lt;/</span>span<span class="hl opt">&gt;</span>
+       end      </pre><p data-coord="prj1.umt:208:4">The output specification following the <samp data-coord="prj1.umt:208:43">=&gt;</samp> uses a pseudo-code
+<samp data-coord="prj1.umt:208:71">if-then-else-end</samp> construct to distinguish between the case when
+<samp data-coord="prj1.umt:208:141">text</samp> is present and when it is not.  Note that if <samp data-coord="prj1.umt:208:193">text</samp> is
+present, then <samp data-coord="prj1.umt:208:221">items</samp> is ignored.
+</p></li><li data-coord="prj1.umt:213:0"><p data-coord="prj1.umt:213:4">A <strong data-coord="prj1.umt:213:6">header</strong> can be used to display a heading:
+</p><pre>    <span class="hl opt">{</span> type<span class="hl opt">:</span> <span class="hl str">&apos;header&apos;</span><span class="hl opt">,</span> attr<span class="hl opt">:</span> Attr<span class="hl opt">,</span> level<span class="hl opt">: [</span><span class="hl num">1</span><span class="hl opt">-</span><span class="hl num">6</span><span class="hl opt">],</span> text<span class="hl opt">:</span> String<span class="hl opt">, }</span>
+    <span class="hl opt">=&gt; &lt;</span>`h$<span class="hl opt">{</span>level<span class="hl opt">}</span>` attr<span class="hl opt">&gt;</span>text<span class="hl opt">&lt;</span>`<span class="hl opt">/</span>h$<span class="hl opt">{</span>level<span class="hl opt">}</span>`<span class="hl opt">&gt;</span></pre><p data-coord="prj1.umt:220:4">The <samp data-coord="prj1.umt:220:8">level</samp> property should be an integer between 1 to 6
+inclusive.  The output specification uses JavaScript's template
+literal notation to indicate generation of HTML tags <samp data-coord="prj1.umt:220:186">h1</samp> to <samp data-coord="prj1.umt:220:194">h6</samp>.
+</p></li><li data-coord="prj1.umt:224:0"><p data-coord="prj1.umt:224:4">A <strong data-coord="prj1.umt:224:6">link</strong> to another page:
+</p><pre>    <span class="hl opt">{</span> type<span class="hl opt">:</span> <span class="hl str">&apos;link&apos;</span><span class="hl opt">,</span> attr<span class="hl opt">:</span> Attr<span class="hl opt">,</span> ref<span class="hl opt">:</span> String<span class="hl opt">,</span> text<span class="hl opt">:</span> String<span class="hl opt">, }</span>
+    <span class="hl opt">=&gt; &lt;</span>a href<span class="hl opt">=</span><span class="hl str">&quot;url(ref)&quot;</span> attr<span class="hl opt">&gt;</span>text<span class="hl opt">&lt;/</span>a<span class="hl opt">&gt;</span></pre><p data-coord="prj1.umt:231:4">where <samp data-coord="prj1.umt:231:10">url(ref)</samp> should return a URL which is identical to
+the URL of the current page except that it has a <samp data-coord="prj1.umt:231:116">ref</samp>
+query parameter set to the value of the <samp data-coord="prj1.umt:231:166">ref</samp> property.
+</p></li><li data-coord="prj1.umt:235:0"><p data-coord="prj1.umt:235:4">A <strong data-coord="prj1.umt:235:6">form</strong>:
+</p><pre>    <span class="hl opt">{</span> type<span class="hl opt">:</span> <span class="hl str">&apos;form&apos;</span><span class="hl opt">,</span> attr<span class="hl opt">:</span> Attr<span class="hl opt">,</span> items<span class="hl opt">:</span> List<span class="hl opt">&lt;</span>Content<span class="hl opt">&gt;, }</span>
+    <span class="hl opt">=&gt; &lt;</span>form attr<span class="hl opt">&gt;=</span>items<span class="hl opt">=&lt;/</span>form<span class="hl opt">&gt;</span></pre><p data-coord="prj1.umt:242:4"><span id="submitting" data-coord="prj1.umt:242:18">When</span> an <strong data-coord="prj1.umt:242:26">error-free</strong> form is submitted, the values
+of the widgets should be output on the console using
+<samp data-coord="prj1.umt:242:130">console.log()</samp> as JSON with an indent of 2.  The value output
+should be an object containing a property for each active <samp data-coord="prj1.umt:242:255">name</samp>
+in the form.  The values of widgets which are potentially
+multi-valued <strong data-coord="prj1.umt:242:341">must</strong> be output as a list.
+</p></li><li data-coord="prj1.umt:249:0"><p data-coord="prj1.umt:249:4">Now <span id="submit" data-coord="prj1.umt:249:18">we</span> get into form controls or widgets.  Usually, a
+form will have some kind of <strong data-coord="prj1.umt:249:100">submit</strong> button for submitting the
+form:
+</p><pre>    <span class="hl opt">{</span> type<span class="hl opt">:</span> <span class="hl str">&apos;submit&apos;</span><span class="hl opt">,</span> attr<span class="hl opt">:</span> Attr<span class="hl opt">,</span> text<span class="hl opt">:</span> String<span class="hl opt">, }</span>
+    <span class="hl opt">=&gt;</span>
+    <span class="hl opt">&lt;</span>div<span class="hl opt">&gt;&lt;/</span>div<span class="hl opt">&gt;</span>
+    <span class="hl opt">&lt;</span>button type<span class="hl opt">=</span><span class="hl str">&quot;submit&quot;</span> attr<span class="hl opt">&gt;</span>text<span class="hl opt">&lt;/</span>button<span class="hl opt">&gt;</span></pre><p data-coord="prj1.umt:260:4">If <samp data-coord="prj1.umt:260:7">text</samp> is not specified, it should default to <samp data-coord="prj1.umt:260:53">Submit</samp>.
+</p><p data-coord="prj1.umt:262:4">[The empty <samp data-coord="prj1.umt:262:15">div</samp> element is necessary to place the submit
+correctly with the provided stylesheet.  The stylesheet assumes
+that each widget is preceeded by a <samp data-coord="prj1.umt:262:169">label</samp> object.  In this case,
+the empty <samp data-coord="prj1.umt:262:214">div</samp> substitutes for the lack of a <samp data-coord="prj1.umt:262:250">label</samp> object.]
+</p></li><li data-coord="prj1.umt:267:0"><p data-coord="prj1.umt:267:4"><span id="input" data-coord="prj1.umt:267:13">We</span> allow specifying simple <strong data-coord="prj1.umt:267:40">input</strong> controls for allowing
+the input of text:
+</p><pre>    <span class="hl opt">{</span> type<span class="hl opt">:</span> <span class="hl str">&apos;input&apos;</span><span class="hl opt">,</span> attr<span class="hl opt">:</span> Attr<span class="hl opt">,</span> subType<span class="hl opt">:</span> SubType<span class="hl opt">,</span>
+      text<span class="hl opt">:</span> String<span class="hl opt">,</span> required<span class="hl opt">:</span> Boolean<span class="hl opt">,</span>
+      chkFn<span class="hl opt">:</span> Function<span class="hl opt">,</span> errMsgFn<span class="hl opt">:</span> Function<span class="hl opt">,</span>
+    <span class="hl opt">}</span>
+    <span class="hl opt">=&gt;</span> <span class="hl kwa">if</span> <span class="hl opt">(</span>subType <span class="hl opt">===</span> <span class="hl str">&apos;textarea&apos;</span><span class="hl opt">)</span> then
+       then <span class="hl opt">&lt;</span>label <span class="hl kwa">for</span><span class="hl opt">=</span>ID<span class="hl opt">&gt;</span>text<span class="hl opt">*&lt;/</span>label<span class="hl opt">&gt;</span>
+            <span class="hl opt">&lt;</span>div<span class="hl opt">&gt;</span>
+              <span class="hl opt">&lt;</span>textarea attr id<span class="hl opt">=</span>ID<span class="hl opt">&gt;&lt;/</span>textarea<span class="hl opt">&gt;</span>
+              <span class="hl opt">&lt;</span>div <span class="hl kwc">class</span><span class="hl opt">=</span><span class="hl str">&quot;error&quot;</span> id<span class="hl opt">=</span>ID<span class="hl opt">&gt;&lt;/</span>div<span class="hl opt">&gt;</span>
+            <span class="hl opt">&lt;/</span>div<span class="hl opt">&gt;</span>
+       <span class="hl kwa">else</span> <span class="hl opt">&lt;</span>label <span class="hl kwa">for</span><span class="hl opt">=</span>ID<span class="hl opt">&gt;</span>text<span class="hl opt">*&lt;/</span>label<span class="hl opt">&gt;</span>
+            <span class="hl opt">&lt;</span>div<span class="hl opt">&gt;</span>
+              <span class="hl opt">&lt;</span>input attr id<span class="hl opt">=</span>ID<span class="hl opt">/&gt;</span>
+              <span class="hl opt">&lt;</span>div <span class="hl kwc">class</span><span class="hl opt">=</span><span class="hl str">&quot;error&quot;</span> id<span class="hl opt">=</span>ID<span class="hl opt">&gt;&lt;/</span>div<span class="hl opt">&gt;</span>
+             <span class="hl opt">&lt;/</span>div<span class="hl opt">&gt;</span>
+       end</pre><p data-coord="prj1.umt:289:4">The <samp data-coord="prj1.umt:289:8">SubType</samp> can be <samp data-coord="prj1.umt:289:25">textarea</samp> or any value supported for the
+<samp data-coord="prj1.umt:289:71">type</samp> attribute of <samp data-coord="prj1.umt:289:91">&lt;input&gt;</samp> elements in HTML5. It defaults
+to iiteral value <samp data-coord="prj1.umt:289:153">"text"</samp>.
+</p><p data-coord="prj1.umt:293:4">The <samp data-coord="prj1.umt:293:8">text</samp> property specifies the label for the widget. 
+</p><p data-coord="prj1.umt:295:4">The remaining input properties specify validation constraints on
+the input:
+</p><ul data-coord="prj1.umt:298:0"><li data-coord="prj1.umt:298:0"><p data-coord="prj1.umt:298:10">The <samp data-coord="prj1.umt:298:14">required</samp> property is specified as <code><span class="hl kwa">true</span></code> if the
+input must contain at least one non-whitespace character.
+If <samp data-coord="prj1.umt:298:139">required</samp> is <code><span class="hl kwa">true</span></code>, then the input must
+be checked whenever the widget is <samp data-coord="prj1.umt:298:219">blur</samp>'d or the
+form is submitted.  If the widget value is empty,
+then an error message
+</p><pre>          `The field $<span class="hl opt">{</span>text<span class="hl opt">}</span> must be specified<span class="hl opt">.</span>`</pre><p data-coord="prj1.umt:309:3">must be added to the DOM as explained below.  <samp data-coord="prj1.umt:309:49">${text}</samp>
+refers to text used to label the widget.
+</p></li><li data-coord="prj1.umt:312:0"><p data-coord="prj1.umt:312:10">The <samp data-coord="prj1.umt:312:14">chkFn</samp> property should specify a JavaScript function
+used for validating the input.  It takes up to 3 parameters:
+</p><ol data-coord="prj1.umt:315:0"><li data-coord="prj1.umt:315:0"><p data-coord="prj1.umt:315:14"><strong data-coord="prj1.umt:315:14">val</strong>:  The value provided for the widget by the user.
+</p></li><li data-coord="prj1.umt:317:0"><p data-coord="prj1.umt:317:14"><strong data-coord="prj1.umt:317:14">info</strong>: The complete specification for the widget; i.e.
+the portion before the <samp data-coord="prj1.umt:317:101">=&gt;</samp> in the specification above.
+</p></li><li data-coord="prj1.umt:320:0"><p data-coord="prj1.umt:320:14"><strong data-coord="prj1.umt:320:14">meta</strong>: The complete data structure defined in <samp data-coord="prj1.umt:320:61">meta.js</samp>.
+</p></li></ol><p data-coord="prj1.umt:322:10">This validation function should be called only when a
+non-empty value is provided for the widget whenever the
+widget is <samp data-coord="prj1.umt:322:136">blur</samp>'d or the form is submitted.  It should
+return truthy iff <strong data-coord="prj1.umt:322:203">val</strong> is valid.
+</p></li><li data-coord="prj1.umt:327:0"><p data-coord="prj1.umt:327:10">The <samp data-coord="prj1.umt:327:14">errMsgFn</samp> property must specify a function having the same
+parameters as the <samp data-coord="prj1.umt:327:102">chkFn</samp> property.  It must return a
+suitable error message when the widget value fails
+validation by <samp data-coord="prj1.umt:327:209">chkFn()</samp>.
+</p><p data-coord="prj1.umt:332:10">If <samp data-coord="prj1.umt:332:13">chkFn</samp> is specified, but <samp data-coord="prj1.umt:332:39">errMsgFn</samp> is not specified,
+then when the widget value fails
+validation by <samp data-coord="prj1.umt:332:121">chkFn()</samp>, the error message:
+</p><pre>          `invalid value $<span class="hl opt">{</span>val<span class="hl opt">}</span>`</pre><p data-coord="prj1.umt:340:3">should be displayed (where <samp data-coord="prj1.umt:340:30">val</samp> is the value provided
+for the widget).
+</p></li></ul><p data-coord="prj1.umt:343:4">The output specification following the <samp data-coord="prj1.umt:343:43">=&gt;</samp> uses a pseudo-code
+<samp data-coord="prj1.umt:343:71">if-then-else-end</samp> construct to distinguish between the case when
+the <samp data-coord="prj1.umt:343:145">subType</samp> is <samp data-coord="prj1.umt:343:158">textarea</samp> and everything else.  The expected
+HTML should be quite clear but a few points are worth
+noting:
+</p><ul data-coord="prj1.umt:349:0"><li data-coord="prj1.umt:349:0"><p data-coord="prj1.umt:349:8">The <samp data-coord="prj1.umt:349:12">ID</samp> must be an ID which is guaranteed to be unique
+across the entire HTML page. If the <samp data-coord="prj1.umt:349:108">attr</samp> specifies
+an <samp data-coord="prj1.umt:349:129">id</samp>, then the value of that property should be used.
+</p></li><li data-coord="prj1.umt:353:0"><p data-coord="prj1.umt:353:8">The <samp data-coord="prj1.umt:353:12">text*</samp> notation means that if the <samp data-coord="prj1.umt:353:47">required</samp> property is
+truthy, then a <samp data-coord="prj1.umt:353:93">*</samp> should follow the <samp data-coord="prj1.umt:353:115">text</samp> labelling the widget.
+</p></li><li data-coord="prj1.umt:356:0"><p data-coord="prj1.umt:356:8">Each widget is followed by an empty <samp data-coord="prj1.umt:356:44">div</samp> with <samp data-coord="prj1.umt:356:55">class="error"</samp>.
+This <samp data-coord="prj1.umt:356:85">div</samp> will be used for displaying validation errors for
+the widget.
+</p></li></ul></li><li data-coord="prj1.umt:360:0"><p data-coord="prj1.umt:360:4"><span id="uniSelect" data-coord="prj1.umt:360:17">We</span> have a control specified with <samp data-coord="prj1.umt:360:50">type</samp> <strong data-coord="prj1.umt:360:57">uniSelect</strong>
+which selects a single value from a list of values:
+</p><pre>    <span class="hl opt">{</span> type<span class="hl opt">:</span> <span class="hl str">&apos;uniSelect&apos;</span><span class="hl opt">,</span> attr<span class="hl opt">:</span> Attr<span class="hl opt">,</span> items<span class="hl opt">:</span> List<span class="hl opt">&lt;</span>KeyText<span class="hl opt">&gt;,</span>
+      text<span class="hl opt">:</span> String<span class="hl opt">,</span> required<span class="hl opt">:</span> Boolean<span class="hl opt">,</span>
+      chkFn<span class="hl opt">:</span> Function<span class="hl opt">,</span> errMsgFn<span class="hl opt">:</span> Function<span class="hl opt">,</span>
+    <span class="hl opt">}</span>
+    <span class="hl opt">=&gt;</span> <span class="hl kwa">if</span> <span class="hl opt">(</span>items<span class="hl opt">.</span>length <span class="hl opt">&gt; (</span>_options<span class="hl opt">.</span>N_UNI_SELECT <span class="hl opt">||</span> <span class="hl num">4</span><span class="hl opt">)</span>
+       then <span class="hl opt">&lt;</span>label <span class="hl kwa">for</span><span class="hl opt">=</span>ID<span class="hl opt">&gt;</span>text<span class="hl opt">*&lt;/</span>label<span class="hl opt">&gt;</span>
+            <span class="hl opt">&lt;</span>div<span class="hl opt">&gt;</span>
+              <span class="hl opt">&lt;</span>select attr id<span class="hl opt">=</span>ID<span class="hl opt">&gt;</span><span class="hl kwd">OptionItems</span><span class="hl opt">(</span>items<span class="hl opt">)&lt;/</span>select<span class="hl opt">&gt;</span>
+              <span class="hl opt">&lt;</span>div <span class="hl kwc">class</span><span class="hl opt">=</span><span class="hl str">&quot;error&quot;</span> id<span class="hl opt">=</span>ID<span class="hl opt">&gt;&lt;/</span>span<span class="hl opt">&gt;</span>
+            <span class="hl opt">&lt;/</span>div<span class="hl opt">&gt;</span>
+       <span class="hl kwa">else</span> <span class="hl opt">&lt;</span>label <span class="hl kwa">for</span><span class="hl opt">=</span>ID<span class="hl opt">&gt;</span>text<span class="hl opt">*&lt;/</span>label<span class="hl opt">&gt;</span>
+            <span class="hl opt">&lt;</span>div<span class="hl opt">&gt;</span>
+              <span class="hl opt">&lt;</span>div <span class="hl kwc">class</span><span class="hl opt">=</span><span class="hl str">&quot;fieldset&quot;</span><span class="hl opt">&gt;</span>
+                <span class="hl kwd">InputItems</span><span class="hl opt">(</span>items<span class="hl opt">,</span> <span class="hl str">&apos;radio&apos;</span><span class="hl opt">,</span> attr<span class="hl opt">)</span>
+              <span class="hl opt">&lt;/</span>div<span class="hl opt">&gt;</span>
+              <span class="hl opt">&lt;</span>div <span class="hl kwc">class</span><span class="hl opt">=</span><span class="hl str">&quot;error&quot;</span> id<span class="hl opt">=</span>ID<span class="hl opt">&gt;&lt;/</span>span<span class="hl opt">&gt;</span>
+            <span class="hl opt">&lt;/</span>div<span class="hl opt">&gt;</span>            
+       end</pre><p data-coord="prj1.umt:384:4"><samp data-coord="prj1.umt:384:4">List&lt;KeyText&gt;</samp> means that <samp data-coord="prj1.umt:384:31">items</samp> must be a list of objects
+having <samp data-coord="prj1.umt:384:76">key</samp> and <samp data-coord="prj1.umt:384:86">text</samp> properties, both of which are simply
+strings.  Either <samp data-coord="prj1.umt:384:151">key</samp> or <samp data-coord="prj1.umt:384:160">text</samp> may be omitted in which case it
+defaults to the other.
+</p><p data-coord="prj1.umt:389:4">HTML provides two form controls for selecting one value from a list of
+values: using a dropdown select box or radio buttons.  The choice
+of whether to display a dropdown or radio buttons is based on
+the lenght of <samp data-coord="prj1.umt:389:229">items</samp>.  If it greater than some threshold, then
+a <samp data-coord="prj1.umt:389:285">select</samp> dropdown is used, otherwise radio buttons are used.
+The threshold is specified by <samp data-coord="prj1.umt:389:380">_options.N_UNI_SELECT</samp> where
+_options is a top-level property in the object exported by
+<samp data-coord="prj1.umt:389:477">meta.js</samp>.  If not specified, then it should default to 4.
+</p><ul data-coord="prj1.umt:398:0"><li data-coord="prj1.umt:398:0"><p data-coord="prj1.umt:398:8">The notation <samp data-coord="prj1.umt:398:21">OptionItems(items)</samp> should
+render each <samp data-coord="prj1.umt:398:69">KeyText</samp> <samp data-coord="prj1.umt:398:79">item</samp> in <samp data-coord="prj1.umt:398:89">items</samp> as follows:
+</p><pre>        <span class="hl kwa">&lt;option</span> value=`<span class="hl str">&quot;${item.key&quot;</span>`<span class="hl kwa">&gt;</span>`${item.text}`<span class="hl kwa">&lt;/option&gt;</span></pre></li><li data-coord="prj1.umt:406:0"><p data-coord="prj1.umt:406:8">The notation <samp data-coord="prj1.umt:406:21">InputItems(items, 'radio', attr)</samp> should
+render each <samp data-coord="prj1.umt:406:83">KeyText</samp> <samp data-coord="prj1.umt:406:93">item</samp> in <samp data-coord="prj1.umt:406:103">items</samp> as follows:
+</p><pre>        <span class="hl kwa">&lt;label</span> <span class="hl kwb">for</span>=<span class="hl str">&quot;ID&quot;</span><span class="hl kwa">&gt;</span>`${item.text}`<span class="hl kwa">&lt;/label&gt;</span>
+        <span class="hl kwa">&lt;input</span> value=`<span class="hl str">&quot;%{item.key}&quot;</span>` <span class="hl kwb">type</span>=<span class="hl str">&quot;radio&quot;</span>
+               attr <span class="hl kwb">id</span>=<span class="hl str">&quot;ID&quot;</span><span class="hl kwa">/&gt;</span></pre></li></ul><p data-coord="prj1.umt:416:4">The validations specified by <samp data-coord="prj1.umt:416:33">required</samp> and <samp data-coord="prj1.umt:416:48">chkFn()</samp> should be
+done on form submission or whenever the widget value <strong data-coord="prj1.umt:416:125">changes</strong>.
+</p></li><li data-coord="prj1.umt:419:0"><p data-coord="prj1.umt:419:4"><span id="multiSelect" data-coord="prj1.umt:419:19">The</span> <samp data-coord="prj1.umt:419:23">type</samp> <strong data-coord="prj1.umt:419:30">multiSelect</strong> is used for selecting
+multiple values from a list of values:
+</p><pre>    <span class="hl opt">{</span> type<span class="hl opt">:</span> <span class="hl str">&apos;multiSelect&apos;</span><span class="hl opt">,</span> attr<span class="hl opt">:</span> Attr<span class="hl opt">,</span> items<span class="hl opt">:</span> List<span class="hl opt">&lt;</span>KeyText<span class="hl opt">&gt;,</span> text<span class="hl opt">:</span> String<span class="hl opt">,</span> 
+      required<span class="hl opt">:</span> Boolean<span class="hl opt">,</span> chkFn<span class="hl opt">:</span> Function<span class="hl opt">,</span> errMsgFn<span class="hl opt">:</span> Function<span class="hl opt">,</span>
+    <span class="hl opt">}</span>
+    <span class="hl opt">=&gt;</span> <span class="hl kwa">if</span> <span class="hl opt">(</span>items<span class="hl opt">.</span>length <span class="hl opt">&gt; (</span>_options<span class="hl opt">.</span>N_MULTI_SELECT <span class="hl opt">||</span> <span class="hl num">4</span><span class="hl opt">)</span>
+       then <span class="hl opt">&lt;</span>label <span class="hl kwa">for</span><span class="hl opt">=</span>ID<span class="hl opt">&gt;</span>text<span class="hl opt">*&lt;/</span>label<span class="hl opt">&gt;</span>
+            <span class="hl opt">&lt;</span>div<span class="hl opt">&gt;</span>
+              <span class="hl opt">&lt;</span>select attr multiple<span class="hl opt">=</span><span class="hl str">&quot;true&quot;</span> id<span class="hl opt">=</span>ID<span class="hl opt">&gt;</span>
+                <span class="hl kwd">OptionItems</span><span class="hl opt">(</span>items<span class="hl opt">)</span>
+              <span class="hl opt">&lt;/</span>select<span class="hl opt">&gt;</span>
+              <span class="hl opt">&lt;</span>div <span class="hl kwc">class</span><span class="hl opt">=</span><span class="hl str">&quot;error&quot;</span> id<span class="hl opt">=</span>ID<span class="hl opt">&gt;&lt;/</span>span<span class="hl opt">&gt;</span>
+            <span class="hl opt">&lt;/</span>div<span class="hl opt">&gt;</span>
+       <span class="hl kwa">else</span> <span class="hl opt">&lt;</span>label <span class="hl kwa">for</span><span class="hl opt">=</span>ID<span class="hl opt">&gt;</span>text<span class="hl opt">*&lt;/</span>label<span class="hl opt">&gt;</span>
+            <span class="hl opt">&lt;</span>div<span class="hl opt">&gt;</span>
+              <span class="hl opt">&lt;</span>div <span class="hl kwc">class</span><span class="hl opt">=</span><span class="hl str">&quot;fieldset&quot;</span><span class="hl opt">&gt;</span>
+                <span class="hl kwd">InputItems</span><span class="hl opt">(</span>items<span class="hl opt">,</span> <span class="hl str">&apos;checkbox&apos;</span><span class="hl opt">,</span> attr<span class="hl opt">)</span>
+              <span class="hl opt">&lt;/</span>div<span class="hl opt">&gt;</span>
+              <span class="hl opt">&lt;</span>div <span class="hl kwc">class</span><span class="hl opt">=</span><span class="hl str">&quot;error&quot;</span> id<span class="hl opt">=</span>ID<span class="hl opt">&gt;&lt;/</span>span<span class="hl opt">&gt;</span>
+            <span class="hl opt">&lt;/</span>div<span class="hl opt">&gt;</span>            
+       end</pre><p data-coord="prj1.umt:444:4">This is very similar to the <samp data-coord="prj1.umt:444:32">uniSelect</samp> <samp data-coord="prj1.umt:444:44">type</samp> except that
+depending on the number of items, it generates either a <samp data-coord="prj1.umt:444:123">&lt;select&gt;</samp>
+widget with its <samp data-coord="prj1.umt:444:154">multiple</samp> attribute set to <samp data-coord="prj1.umt:444:182">"true"</samp> or a set of
+<samp data-coord="prj1.umt:444:207">checkbox</samp> widgets.
+</p></li></ul></section><section data-coord="prj1.umt:450:0"><h2 data-coord="prj1.umt:450:0">WebPack</h2><p data-coord="prj1.umt:453:0">The <samp data-coord="prj1.umt:453:4">&lt;script&gt;</samp> element can be used within a HTML page for loading
+external scripts into a browser.  This entails a network request
+which can be relatively slow.  Given that the fact that modern
+websites may involve using tens or even hundreds of external
+libraries, loading all these libraries can result in a non-peformant
+website.
+</p><p data-coord="prj1.umt:460:0">A solution to this problem in the early days of the web was to simply
+concatenate multiple JavaScript files and libraries together. This
+resulted in fewer network requests, but given the lack of modules in
+the original version of the language, this was often difficult to do
+correctly.  Attempts to reduce the size of each network request
+results in <strong data-coord="prj1.umt:460:350">minifiers</strong> which removed comments and non-significant
+whitespace as well as shortening identifiers.
+</p><p data-coord="prj1.umt:468:0">This evolution resulted in the development of <strong data-coord="prj1.umt:468:46">bundler</strong> programs
+which bundled multiple resources like scripts, stylesheets, images
+into a single bundle. One of the most popular of the bundlers
+currently being used is <a href="https://webpack.js.org/" data-coord="prj1.umt:468:245">webpack.</a>
+</p><p data-coord="prj1.umt:473:0">The <a href="https://webpack.js.org/concepts/" data-coord="prj1.umt:473:40">concepts</a> underlying webpack
+are quite straightforward.  An application may have one or more
+top-level <strong data-coord="prj1.umt:473:142">entry</strong> points; all dependent resources reachable from these
+entry points are <strong data-coord="prj1.umt:473:220">output</strong> into a bundle.  Resources are loaded using
+<strong data-coord="prj1.umt:473:272">loaders</strong> and recursively traversed while looking for additional
+resources which need to be added to the bundle.  The core capabilities
+of webpack can be extended using its <strong data-coord="prj1.umt:473:445">plugin</strong> architecture to install
+plugins which provide services like transformations.  For example, it
+is possible to write code in modern JavaScript or even a totally
+different language and then use a webpack plugin to
+<a href="https://en.wikipedia.org/wiki/Source-to-source_compiler" data-coord="prj1.umt:473:724">transpile</a>
+it into a version of JavaScript which runs even in relatively old browsers.
+</p></section><section data-coord="prj1.umt:489:0"><h2 data-coord="prj1.umt:489:0">Provided Files</h2><p data-coord="prj1.umt:492:0">The <a href="./prj1-sol" data-coord="prj1.umt:492:18">prj1-sol</a> directory contains a start for your
+project.  It contains the following files:
+</p><dl data-coord="prj1.umt:495:0"><dt data-coord="prj1.umt:495:2"> <a href="prj1-sol/src/index.js?colorize=true" data-coord="prj1.umt:495:40">index.js</a> </dt><dd data-coord="prj1.umt:496:0"><p data-coord="prj1.umt:496:4">A partial implementation of your program.  Areas you need to
+implement are indicated by <samp data-coord="prj1.umt:496:96">@TODO</samp> comments.  Add code as
+necessary, feeling free to restructure the file.
+</p></dd><dt data-coord="prj1.umt:500:2"> <a href="prj1-sol/webpack.config.js?colorize=true" data-coord="prj1.umt:500:45">webpack.config.js</a> </dt><dd data-coord="prj1.umt:501:0"><p data-coord="prj1.umt:501:4">A simple configuration file for webpack.  It is commented
+extensively and should be quite understandable.  You should not
+need to modify this file.
+</p></dd><dt data-coord="prj1.umt:505:2"> <a href="prj1-sol/src/meta.js?colorize=true" data-coord="prj1.umt:505:39">meta.js</a> </dt><dd data-coord="prj1.umt:506:0"><p data-coord="prj1.umt:506:4">A file which specifies the content to be produced by your
+program.  Note that even though this file will be bundled along
+with your code, it should still be regarded as an <strong data-coord="prj1.umt:506:184">input</strong> to
+your program.  It is entirely possible that your program will
+be tested using a totally different <samp data-coord="prj1.umt:506:301">meta.js</samp>.
+</p><p data-coord="prj1.umt:512:4">You may modify this file when testing your program, add more
+pages and forms.
+</p></dd><dt data-coord="prj1.umt:515:2"> <a href="prj1-sol/src/style.css" data-coord="prj1.umt:515:27">style.css</a> </dt><dd data-coord="prj1.umt:516:0"><p data-coord="prj1.umt:516:4">A style sheet which ensures that your generated content is
+reasonably readable.  You should not need to modify this file.
+</p></dd><dt data-coord="prj1.umt:519:2"> <a href="./prj1-sol/README" data-coord="prj1.umt:519:22">README</a></dt><dd data-coord="prj1.umt:520:0"><p data-coord="prj1.umt:520:4">A README file which must be submitted along with your project.  It
+contains an initial header which you must complete (replace the
+dummy entries with your name, B-number and email address at which
+you would like to receive project-related email).  After the
+header you may include any content which you would like read
+during the grading of your project.  If your project is
+not complete, document what is not working in the <samp data-coord="prj1.umt:520:453">README</samp>.
+</p></dd><dt data-coord="prj1.umt:528:2"> <a href="./prj1-sol/.gitignore" data-coord="prj1.umt:528:27">.gitignore</a> </dt><dd data-coord="prj1.umt:529:0"><p data-coord="prj1.umt:529:4">A file which lists paths which should be ignored by git.
+You should not need to modify this file.
+</p></dd></dl></section><section data-coord="prj1.umt:533:0"><h2 data-coord="prj1.umt:533:0">Hints</h2><p data-coord="prj1.umt:536:0">You should feel free to use any of the functions from the standard
+<em data-coord="prj1.umt:536:126"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript" data-coord="prj1.umt:536:126">JavaScript
+library</a></em>, <em data-coord="prj1.umt:536:200"><a href="https://developer.mozilla.org/en-US/docs/Web/API" data-coord="prj1.umt:536:200">basic
+browser API</a></em>'s like
+<a href="https://developer.mozilla.org/en-US/docs/Web/API/URL" data-coord="prj1.umt:536:283">URL,</a> as well
+as those from <a href="https://api.jquery.com/" data-coord="prj1.umt:536:337">jquery.</a>  Note that you are
+not allowed to use any external library other than jquery at runtime.
+</p><p data-coord="prj1.umt:545:0">The following steps are not prescriptive in that you may choose to
+ignore them as long as you meet all project requirements.
+</p><ol data-coord="prj1.umt:548:0"><li data-coord="prj1.umt:548:0"><p data-coord="prj1.umt:548:4">Set up your course VM as per the instructions specified in the
+<em data-coord="prj1.umt:548:108"><a href="../../misc/vm-setup/vm-setup.html" data-coord="prj1.umt:548:108">VM Setup</a></em> and
+<em data-coord="prj1.umt:548:166"><a href="../../misc/git-setup/git-setup.html" data-coord="prj1.umt:548:166">Git Setup</a></em> 
+documents.
+</p><p data-coord="prj1.umt:553:4">The subsequent steps assume that you are working on a properly
+setup VM.
+</p></li><li data-coord="prj1.umt:557:0"><p data-coord="prj1.umt:557:4">Read the project requirements thoroughly.  Compare the
+provided <a href="prj1-sol/src/meta.js?colorize=true" data-coord="prj1.umt:557:110">meta.js.</a>
+with the program <a href="extras/bin" data-coord="prj1.umt:557:154">behavior.</a>  Reconcile
+both with the requirements for the <a href="#types" data-coord="prj1.umt:557:224">types.</a>
+</p><p data-coord="prj1.umt:562:4">Look at the provided code.  Look at least briefly at
+<a href="prj1-sol/webpack.config.js?colorize=true" data-coord="prj1.umt:562:105">webpack.config.js.</a>
+Look at the provided code in
+<a href="prj1-sol/src/index.js?colorize=true" data-coord="prj1.umt:562:200">index.js</a> much more
+thoroughly as you will need to understand it in order to write
+your own code.
+</p></li><li data-coord="prj1.umt:570:0"><p data-coord="prj1.umt:570:4">Familiarize yourself with your browser's debugger.  This can
+usually be invoked using F12.  In
+<a href="https://developers.google.com/web/tools/chrome-devtools/javascript" data-coord="prj1.umt:570:181">chrome,</a> the <samp data-coord="prj1.umt:570:193">Elements</samp> tab will be useful to examine the objects
+you have injected into the DOM, the <samp data-coord="prj1.umt:570:286">Console</samp> tab for looking at
+runtime errors and the <samp data-coord="prj1.umt:570:342">Sources</samp> tab for examining source code and
+setting breakpoints.  Note that you will find your original source
+code under <samp data-coord="prj1.umt:570:472">webpack-internal://</samp>.  In
+<a href="https://developer.mozilla.org/en-US/docs/Tools/Debugger" data-coord="prj1.umt:570:566">firefox,</a> you will find equivalent tabs <samp data-coord="prj1.umt:570:605">Inspector</samp>, <samp data-coord="prj1.umt:570:618">Console</samp> and
+<samp data-coord="prj1.umt:570:636">Debugger</samp>.
+</p></li><li data-coord="prj1.umt:582:0"><p data-coord="prj1.umt:582:4">Copy over the provided files into your <samp data-coord="prj1.umt:582:43">i?44</samp> github project:
+</p><pre>    $ <span class="hl kwb">cd</span> ~<span class="hl opt">/</span>i?<span class="hl num">44</span>                    <span class="hl slc">#cd to dir for github repo</span>
+    $ git checkout <span class="hl kwb">-b</span> prj1-sol     <span class="hl slc">#create new git branch</span>
+    $ mkdir <span class="hl kwb">-p</span> submit              <span class="hl slc">#create submit dir if not exist</span>
+    $ <span class="hl kwb">cd</span> submit                    <span class="hl slc">#change over to submit dir</span>
+    $ <span class="hl kwc">cp</span> <span class="hl kwb">-pr</span> ~<span class="hl opt">/</span>cs544<span class="hl opt">/</span>projects<span class="hl opt">/</span>prj<span class="hl num">1</span><span class="hl opt">/</span>prj1-sol . <span class="hl slc">#copy provided files</span>
+    $ <span class="hl kwb">cd</span> prj1-sol                  <span class="hl slc">#go into project dir</span></pre><p data-coord="prj1.umt:594:4">Note the <samp data-coord="prj1.umt:594:13">.</samp> indicating the current directory at the end of the
+second-last command.
+</p></li><li data-coord="prj1.umt:597:0"><p data-coord="prj1.umt:597:4">Capture a <samp data-coord="prj1.umt:597:14">vm.png</samp> image as instructed in the <a href="#vm" data-coord="prj1.umt:597:57">requirements.</a>
+Transfer this image over to your prj1-sol.
+</p></li><li data-coord="prj1.umt:600:0"><p data-coord="prj1.umt:600:4">Use your favorite editor to replace the <samp data-coord="prj1.umt:600:44">XXX</samp> entries in the
+<samp data-coord="prj1.umt:600:69">README</samp> template.
+</p></li><li data-coord="prj1.umt:604:0"><p data-coord="prj1.umt:604:4">Commit your project to github:
+</p><pre data-coord="prj1.umt:607:0">    $ git add .                       #add all files to git staging
+    $ git commit -a -m 'started prj1' #commit them to local git
+    $ git push -u origin prj1-sol     #push to github,
+                                      #tie local prj1-sol branch to remote
+</pre></li><li data-coord="prj1.umt:613:0"><p data-coord="prj1.umt:613:4">Set up your project as an <a href="https://docs.npmjs.com/" data-coord="prj1.umt:613:57">npm</a> project:
+</p><pre>    $ npm init <span class="hl kwb">-y</span>
+    $ npm <span class="hl kwc">install</span> <span class="hl kwb">--save-dev</span> \
+      webpack webpack-cli webpack-dev-server \
+      css-loader style-loader html-webpack-plugin
+    $ npm <span class="hl kwc">install</span> jquery</pre><ol data-coord="prj1.umt:624:0"><li data-coord="prj1.umt:624:0"><p data-coord="prj1.umt:624:8">The first command initializes your project.  It will create
+a <samp data-coord="prj1.umt:624:78">package.json</samp> file containing default information.
+</p></li><li data-coord="prj1.umt:627:0"><p data-coord="prj1.umt:627:8">The second command installs dependencies you need for developing
+your project.
+</p><ul data-coord="prj1.umt:630:0"><li data-coord="prj1.umt:630:0"><p data-coord="prj1.umt:630:12">The <samp data-coord="prj1.umt:630:16">--save-dev</samp> option indicates that the dependencies
+are needed only for <strong data-coord="prj1.umt:630:93">development</strong>.  These libraries will not
+be loaded into the browser at runtime.
+</p></li><li data-coord="prj1.umt:634:0"><p data-coord="prj1.umt:634:12">The <samp data-coord="prj1.umt:634:16">webpack</samp> module provides the webpack core;
+<samp data-coord="prj1.umt:634:65">webpack-cli</samp> provides a command-line interface to webpack
+(run it from the command-line using <samp data-coord="prj1.umt:634:165">npx webpack --help</samp>
+from within your project directory), <samp data-coord="prj1.umt:634:228">webpack-dev-server</samp>
+provides an HTTP server which supports <strong data-coord="prj1.umt:634:293">Hot Module
+	    Replacement</strong>
+<a href="https://webpack.js.org/concepts/hot-module-replacement/" data-coord="prj1.umt:634:392">HMR,</a> <samp data-coord="prj1.umt:634:397">css-loader</samp> loads css files into your bundle and
+<samp data-coord="prj1.umt:634:452">style-loader</samp> injects the loaded css into your HTML,
+<samp data-coord="prj1.umt:634:511">html-webpack-plugin</samp> generates an empty HTML page which
+sucks in the generated bundle.
+</p></li></ul><p data-coord="prj1.umt:646:8">Ignore warnings re. fsevents which is not needed on linux.
+See
+<em data-coord="prj1.umt:646:208"><a href="https://stackoverflow.com/questions/46929196/how-to-solve-npm-install-throwing-fsevents-warning-on-non-mac-os" data-coord="prj1.umt:646:208">this stackoverflow article</a></em> and
+<em data-coord="prj1.umt:646:305"><a href="https://github.com/google/web-starter-kit/issues/796" data-coord="prj1.umt:646:305">this
+        issue</a></em> for more information.
+</p></li><li data-coord="prj1.umt:654:0"><p data-coord="prj1.umt:654:8">The last command installs <samp data-coord="prj1.umt:654:34">jquery</samp>.  Note that since the
+<samp data-coord="prj1.umt:654:73">--save-dev</samp> option is not provided, it installs it as a
+<strong data-coord="prj1.umt:654:138">runtime</strong> dependency which will be included in the bundle sent
+to the browser.
+</p><p data-coord="prj1.umt:659:8">[Older npm documentation specifies the <samp data-coord="prj1.umt:659:47">--save</samp> option, but that
+is no longer necessary].
+</p></li></ol><p data-coord="prj1.umt:662:4">Running these commands will create a <samp data-coord="prj1.umt:662:41">node_modules</samp> directory,
+register the dependencies in your <samp data-coord="prj1.umt:662:105">package.json</samp> file and create a
+<samp data-coord="prj1.umt:662:142">package-lock.json</samp> file (the last filename is somewhat
+misleading).
+</p></li><li data-coord="prj1.umt:667:0"><p data-coord="prj1.umt:667:4">Edit the <samp data-coord="prj1.umt:667:13">package.json</samp> file to add the following line:
+</p><pre data-coord="prj1.umt:670:0">    "start": "webpack-dev-server -d --mode development"
+</pre><p data-coord="prj1.umt:673:4">after the <samp data-coord="prj1.umt:673:14">scripts.test</samp> entry.  Note that you will need to add
+a comma <samp data-coord="prj1.umt:673:80">,</samp> after the <samp data-coord="prj1.umt:673:94">test</samp> entry to ensure that
+the file continues to be valid json.
+</p></li><li data-coord="prj1.umt:677:0"><p data-coord="prj1.umt:677:4">You should now be able to run the project.  In a separate
+terminal window (or tab), start the <samp data-coord="prj1.umt:677:102">webpack-dev-server</samp>
+via the script you just installed in <samp data-coord="prj1.umt:677:164">package.json</samp>:
+</p><pre>    $ npm run start</pre><p data-coord="prj1.umt:686:4">You will get a message telling you that a server has been started
+at port 8080.  Point a browser running on the same machine to
+<samp data-coord="prj1.umt:686:140">http://localhost:8080</samp> and you should see a page listing all the
+different forms listed by <samp data-coord="prj1.umt:686:236">meta.js</samp>.
+</p><p data-coord="prj1.umt:691:4">Note that the page <samp data-coord="prj1.umt:691:23">Form Links</samp> should be displayed completely
+because the provided code implements all the necessary functionality.
+That will not be the case for the individual forms: the first 3
+only display the headers and the last displays the header and
+some miscellaneous text.
+</p></li><li data-coord="prj1.umt:697:0"><p data-coord="prj1.umt:697:4">Verify that
+<a href="https://webpack.js.org/concepts/hot-module-replacement/" data-coord="prj1.umt:697:79">HMR</a> is
+working.  Go into a source code file like <samp data-coord="prj1.umt:697:132">src/index.js</samp> and
+introduce a syntax error by adding say a stray right parentheses
+<samp data-coord="prj1.umt:697:224">)</samp> after the first <samp data-coord="prj1.umt:697:244">import</samp> keyword.  You should see an error in
+both your terminal and the browser.  Remove the error and you
+should again see the clean page in the browser and a clean compile
+in the terminal.
+</p><p data-coord="prj1.umt:706:4">Note that only compile-time errors are displayed in the browser.
+Runtime errors will be displayed in the console.
+</p></li><li data-coord="prj1.umt:709:0"><p data-coord="prj1.umt:709:4">Commit your updates into github:
+</p><pre>    $ git add .
+    $ git commit <span class="hl kwb">-a -m</span> <span class="hl str">&apos;project started working&apos;</span>
+    $ git push</pre><p data-coord="prj1.umt:718:4">Note that the <samp data-coord="prj1.umt:718:18">node_modules</samp> directory should not get committed as
+it is set up to be ignored by the provided
+<a href="./prj1-sol/.gitignore" data-coord="prj1.umt:718:148">.gitignore.</a>
+</p></li><li data-coord="prj1.umt:722:0"><p data-coord="prj1.umt:722:4">Fire up the browser debugger using F12.  If you go into the
+<strong data-coord="prj1.umt:722:68">Sources</strong> tab (chrome) or <strong data-coord="prj1.umt:722:94">Debugger</strong> tab (firefox) and
+dive into <samp data-coord="prj1.umt:722:137">webpack-internal://</samp> you should see your
+source code:
+</p><p data-coord="prj1.umt:727:4">Navigate the debugger into <samp data-coord="prj1.umt:727:31">src/index.js</samp> and add a breakpoint on
+the third line in the <samp data-coord="prj1.umt:727:96">header()</samp> function which starts with
+<samp data-coord="prj1.umt:727:138">$e.text</samp> (simply click on the line number).  Refresh the page
+being displayed in the browser.  The breakpoint should be hit, the
+browser page will be displayed as empty while the program is
+paused.  Mouse over variables in the source code displayed in the
+debugger window; you should see their current values.
+</p><p data-coord="prj1.umt:735:4">Remove the breakpoint by clicking the line number once again and
+continue execution by clicking on <strong data-coord="prj1.umt:735:107">pause/resume</strong> control (the
+arrow-like symbol towards the top-right of your debugger window).
+Execution should continue and the page should be redisplayed.
+</p><p data-coord="prj1.umt:740:4">As you work on your project, be sure to use the other controls
+you will find near the pause/resume control.  The <strong data-coord="prj1.umt:740:121">step</strong> control
+steps to the next line in the current function, the <strong data-coord="prj1.umt:740:192">step into</strong> steps into
+a function while <strong data-coord="prj1.umt:740:236">step out of</strong> runs until control returns from the
+current function.  While the program is stopped you can resume
+till the next breakpoint using the <strong data-coord="prj1.umt:740:392">pause/resume</strong> control.
+</p><p data-coord="prj1.umt:747:4">Whew!! You are now set up and ready to start developing your
+project code.  The subsequent steps start out with simple <samp data-coord="prj1.umt:747:127">type</samp>'s
+and build up towards the more complex ones.  To start with, we
+will ignore the requirements on event handlers.
+</p></li><li data-coord="prj1.umt:752:0"><p data-coord="prj1.umt:752:4">Add code for the <a href="#submit" data-coord="prj1.umt:752:32">submit</a> <samp data-coord="prj1.umt:752:39">type</samp>.  Use <samp data-coord="prj1.umt:752:52">makeElement()</samp> to
+create an empty <samp data-coord="prj1.umt:752:91">div</samp> and <samp data-coord="prj1.umt:752:101">append()</samp> it to <samp data-coord="prj1.umt:752:118">$element</samp>.  Extend the
+provided <samp data-coord="prj1.umt:752:155">meta.attr</samp> (using
+<em data-coord="prj1.umt:752:280"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/assign" data-coord="prj1.umt:752:280">Object.assign()</a></em>) to add in a <samp data-coord="prj1.umt:752:311">{ type: 'submit' }</samp> attribute.
+Then create a <samp data-coord="prj1.umt:752:361">button</samp> element with the extended attributes.
+Assign the provided <samp data-coord="prj1.umt:752:432">meta.text</samp> to it using its
+<a href="https://api.jquery.com/text/" data-coord="prj1.umt:752:496">text()</a> method.  Finally append the
+button element to <samp data-coord="prj1.umt:752:553">$element</samp>.
+</p><p data-coord="prj1.umt:762:4">Test by displaying the forms; you should now see suitable
+submit buttons.
+</p></li><li data-coord="prj1.umt:765:0"><p data-coord="prj1.umt:765:4">Add code for the <a href="#input" data-coord="prj1.umt:765:31">input</a> <samp data-coord="prj1.umt:765:37">type</samp>.  Pull out <samp data-coord="prj1.umt:765:55">meta.text</samp>,
+extending it with a <samp data-coord="prj1.umt:765:92">*</samp> if <samp data-coord="prj1.umt:765:99">meta.required</samp> is truthy.  Create
+an <samp data-coord="prj1.umt:765:141">id</samp> using <samp data-coord="prj1.umt:765:152">makeId()</samp> if the incoming attributes <samp data-coord="prj1.umt:765:190">meta.attr</samp>
+do not already have one.  Append a suitable <samp data-coord="prj1.umt:765:250">label</samp> element to
+<samp data-coord="prj1.umt:765:273">$element</samp> followed by a currently empty <samp data-coord="prj1.umt:765:314">div</samp> element.  Then add
+either a <samp data-coord="prj1.umt:765:352">&lt;textarea&gt;</samp> or <samp data-coord="prj1.umt:765:368">&lt;input&gt;</samp> element to the <samp data-coord="prj1.umt:765:393">div</samp> depending
+on the value of <samp data-coord="prj1.umt:765:429">meta.subType</samp>.  Be sure to extend the incoming
+<samp data-coord="prj1.umt:765:481">meta.attr</samp> suitably as in the previous step.  Finally add an
+empty error <samp data-coord="prj1.umt:765:559">div</samp> to the earlier <samp data-coord="prj1.umt:765:580">div</samp>.
+</p><p data-coord="prj1.umt:775:4">Test by displaying the forms; you should now see suitable
+<samp data-coord="prj1.umt:775:66">&lt;input&gt;</samp> fields.
+</p></li><li data-coord="prj1.umt:778:0"><p data-coord="prj1.umt:778:4">Add code for the <a href="#uniSelect" data-coord="prj1.umt:778:35">uniSelect</a> <samp data-coord="prj1.umt:778:45">type</samp>.  It is just a
+more complicated version of the previous steps but should be quite
+straightforward when simply following the <a href="#uniSelect" data-coord="prj1.umt:778:202">specification.</a>
+</p></li><li data-coord="prj1.umt:783:0"><p data-coord="prj1.umt:783:4">Add code for the <a href="#multiSelect" data-coord="prj1.umt:783:37">multiSelect</a> <samp data-coord="prj1.umt:783:49">type</samp>. You should
+realize that it is very similar to the code for the <samp data-coord="prj1.umt:783:124">uniSelect</samp>
+<samp data-coord="prj1.umt:783:140">type</samp>.  Use the <em data-coord="prj1.umt:783:217"><a href="https://refactoring.com/catalog/extractFunction.html" data-coord="prj1.umt:783:217">Extract Function</a></em> refactoring to extract the common code into
+a function with suitable parameters which accounts for the difference.
+Now the <samp data-coord="prj1.umt:783:367">uniSelect()</samp> and <samp data-coord="prj1.umt:783:385">multiSelect()</samp> functions can become simple
+<em data-coord="prj1.umt:783:483"><a href="https://en.wikipedia.org/wiki/Wrapper_function" data-coord="prj1.umt:783:483">wrapper functions</a></em>
+which call this extracted function.
+</p><p data-coord="prj1.umt:792:4">You should now be able to display all the provided forms.  We will
+now implement the required dynamic behavior by adding event handlers.
+</p></li><li data-coord="prj1.umt:795:0"><p data-coord="prj1.umt:795:4">Add code to implement the required <em data-coord="prj1.umt:795:54"><a href="#submitting" data-coord="prj1.umt:795:54">dynamic
+    behavior</a></em> when the form is submitted. The provided <samp data-coord="prj1.umt:795:118">form()</samp>
+function contains the start of the handler.  For now, ignore the
+requirement that the form be error-free.  Simply use jquery's
+<a href="https://api.jquery.com/serializeArray/" data-coord="prj1.umt:795:308">serializeArray()</a> method
+on <samp data-coord="prj1.umt:795:339">$form</samp> to get the widget values from the form.  Print the
+results on the console after converting to JSON.  You should see
+all the form widgets, but the result of <samp data-coord="prj1.umt:795:511">serializeArray()</samp> is an
+array whereas the requirements want an object.
+</p><p data-coord="prj1.umt:805:4">It is a simple matter to massage the array into the required
+object.  For each <samp data-coord="prj1.umt:805:87">name</samp> in the array, lookup the corresponding
+widget within the form using a selector <samp data-coord="prj1.umt:805:177">$(`[name="${name}"]`,
+    $form)</samp>.  Then if the widget has an attribute <samp data-coord="prj1.umt:805:252">multiple</samp> which
+is truthy or an attribute <samp data-coord="prj1.umt:805:299">type</samp> which is <samp data-coord="prj1.umt:805:315">checkbox</samp>, it is
+a potentially multi-valued widget and the values should be stored
+in the object as an array; otherwise the value is stored directly
+in the object.
+</p><p data-coord="prj1.umt:814:4">Once you have massaged the array into an object <samp data-coord="prj1.umt:814:52">obj</samp>, print it
+out on the console using <samp data-coord="prj1.umt:814:97">JSON.stringify(obj, null, 2)</samp>.
+</p></li><li data-coord="prj1.umt:817:0"><p data-coord="prj1.umt:817:4">Now we need handlers to validate individual widgets on blur events
+(for <samp data-coord="prj1.umt:817:80">type</samp> <samp data-coord="prj1.umt:817:87">input</samp>) or <samp data-coord="prj1.umt:817:99">change</samp> events (for <samp data-coord="prj1.umt:817:120">uniSelect</samp> and
+<samp data-coord="prj1.umt:817:140">multiSelect</samp> <samp data-coord="prj1.umt:817:154">type</samp>'s).  A little reflection will show that the
+required validation behavior is exactly the same except for the
+event which triggers the behavior.  So create a common function
+to set up a handler and attach the handler to the widget
+using jquery's <a href="https://api.jquery.com/on/" data-coord="prj1.umt:817:451">on().</a>
+</p><p data-coord="prj1.umt:825:4">The handler should be defined within a context where it has access
+to the meta-info for the widget.  This ensures that the dynamic
+handler has access to the static validation information associated
+with the widget.
+</p><p data-coord="prj1.umt:830:4">To start with, simply have the handler log something on the
+console and verify that you are catching <samp data-coord="prj1.umt:830:109">blur</samp> and <samp data-coord="prj1.umt:830:120">change</samp>
+events as specified.
+</p><p data-coord="prj1.umt:834:4">Now set up the validation behavior of the handler.  Note that it
+will be called with its first argument specifying the event.  Note
+that if neither <samp data-coord="prj1.umt:834:160">required</samp> or <samp data-coord="prj1.umt:834:174">chkFn</samp> are specified for the
+widget, then no validation is possible and the handler can simply
+return.
+</p><ol data-coord="prj1.umt:840:0"><li data-coord="prj1.umt:840:0"><p data-coord="prj1.umt:840:8">You can get the jquery-wrapped event target <samp data-coord="prj1.umt:840:52">$target</samp> using
+<samp data-coord="prj1.umt:840:76">$(event.target)</samp>.
+</p></li><li data-coord="prj1.umt:843:0"><p data-coord="prj1.umt:843:8">For all widgets except checkboxes, you can get the widget
+value using <samp data-coord="prj1.umt:843:86">$target.val()</samp> (we will consider checkboxes
+later).
+</p></li><li data-coord="prj1.umt:847:0"><p data-coord="prj1.umt:847:8">Get hold of the error <samp data-coord="prj1.umt:847:30">div</samp> for the widget using the id which
+you specified when you created that error <samp data-coord="prj1.umt:847:120">div</samp>.  You can then
+set the error message by using jquery's
+<a href="https://api.jquery.com/text/" data-coord="prj1.umt:847:229">text()</a> method on the error
+<samp data-coord="prj1.umt:847:264">div</samp>.
+</p></li><li data-coord="prj1.umt:853:0"><p data-coord="prj1.umt:853:8">If the <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String/trim" data-coord="prj1.umt:853:111">trim()'d</a> value is empty, then
+if <samp data-coord="prj1.umt:853:152">required</samp> is true for the target widget, then display
+a suitable error, else display an empty error.
+</p></li><li data-coord="prj1.umt:857:0"><p data-coord="prj1.umt:857:8">If the trimmed value is non-empty and there is a <samp data-coord="prj1.umt:857:57">chkFn()</samp>,
+then if <samp data-coord="prj1.umt:857:84">chkFn()</samp> succeeds set the error to empty, otherwise
+set it to a suitable error message (use <samp data-coord="prj1.umt:857:178">errMsgFn()</samp> if it
+is specified, otherwise the specified default message).
+</p></li><li data-coord="prj1.umt:862:0"><p data-coord="prj1.umt:862:8">If the trimmed value is non-empty and there is no <samp data-coord="prj1.umt:862:58">chkFn()</samp>
+there is no error.
+</p></li></ol><p data-coord="prj1.umt:865:4">For checkboxes, you can get a jquery list of all checked boxes
+for a particular <samp data-coord="prj1.umt:865:88">name</samp> in a form <samp data-coord="prj1.umt:865:105">$form</samp> using a selector like
+<samp data-coord="prj1.umt:865:139">$(`input[name="${name}"]:checked`, $form)</samp>.  You can then
+massage that jquery list into a JavaScript array of values
+and then use the array of values for the validation.
+</p></li><li data-coord="prj1.umt:871:0"><p data-coord="prj1.umt:871:4">Now that we have validations working, we need to implement the
+requirement that the submit handler should only be run for an
+<strong data-coord="prj1.umt:871:137">error-free</strong> form.  We can do so using the handlers set up in
+the previous step.  Specifically, we first trigger those
+handlers:
+</p><pre>    $<span class="hl opt">(</span><span class="hl str">&apos;input,select,textarea&apos;</span><span class="hl opt">,</span> $form<span class="hl opt">).</span><span class="hl kwd">trigger</span><span class="hl opt">(</span><span class="hl str">&apos;blur&apos;</span><span class="hl opt">);</span>
+    $<span class="hl opt">(</span><span class="hl str">&apos;input,select&apos;</span><span class="hl opt">,</span> $form<span class="hl opt">).</span><span class="hl kwd">trigger</span><span class="hl opt">(</span><span class="hl str">&apos;change&apos;</span><span class="hl opt">);</span></pre><p data-coord="prj1.umt:882:4">Then we check whether we have any errors within the form by
+looking at the results of the selector <samp data-coord="prj1.umt:882:107">$('.error', $form)</samp>.
+If there are any non-empty error messages, the results
+of the form submission should not be logged on the console.    
+</p></li><li data-coord="prj1.umt:887:0"><p data-coord="prj1.umt:887:4">Iterate until you meet all requirements.
+</p></li><li data-coord="prj1.umt:889:0"><p data-coord="prj1.umt:889:4">If necessary, update your README with your project status
+or any information which you want to convey to the grader.
+</p></li></ol><p data-coord="prj1.umt:892:0">It is a good idea to commit and push your project periodically
+whenever you have made significant changes.  When complete, please
+follow the procedure given in the
+<em data-coord="prj1.umt:892:214"><a href="../../misc/git-setup/git-setup.html#prj-submit" data-coord="prj1.umt:892:214">git setup</a></em> document
+to merge your <samp data-coord="prj1.umt:892:249">prj1-sol</samp> branch into your <samp data-coord="prj1.umt:892:277">master</samp> branch and submit
+your project to the grader via github.
+</p></section></section>
+    </div> <!-- #content -->
+    <script src="../../assets/scripts/loginAction.js"></script>
+  </body>
+</html>
