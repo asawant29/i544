@@ -108,10 +108,10 @@ function typeHandler(event, meta) {
                 $(`div[id="${event.target.id}"]`).text('');
             }
         } else if (meta.chkFn) {
-            if (meta.chkFn($target.val(), meta, meta)) {
+            if (meta.chkFn($target.val(), meta, Meta)) {
                 $(`div[id="${event.target.id}"]`).text('');
             } else {
-                $(`div[id="${event.target.id}"]`).text(meta.errMsgFn ? meta.errMsgFn($target.val(), meta) : `The field ${meta.text} must be specified`);
+                $(`div[id="${event.target.id}"]`).text(meta.errMsgFn ? meta.errMsgFn($target.val(), meta) : `invalid value ${$target.val()}`);
             }
         } else {
             //no error
