@@ -1,12 +1,24 @@
 {
   "name": "prj1-sol",
   "version": "1.0.0",
-  "description": "",
+  "description": "Name:\t\tXXX\r B-Number:\tXXX\r Email:\t\tXXX",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "webpack-dev-server -d --mode development"
   },
   "keywords": [],
   "author": "",
-  "license": "ISC"
+  "license": "ISC",
+  "devDependencies": {
+    "css-loader": "^3.6.0",
+    "html-webpack-plugin": "^4.3.0",
+    "style-loader": "^1.2.1",
+    "webpack": "^4.43.0",
+    "webpack-cli": "^3.3.12",
+    "webpack-dev-server": "^3.11.0"
+  },
+  "dependencies": {
+    "jquery": "^3.5.1"
+  }
 }
