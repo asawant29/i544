@@ -72,26 +72,51 @@ function items(tag, meta, path, $element) {
 //@TODO
 
 function typeHandler(event, meta) {
-
     const $target = $(event.target);
+
     const isCheckbox = $target.attr('type') === 'checkbox';
     const isMultiple = $target.attr('multiple') === 'multiple';
-    if(!isCheckbox && !isMultiple) {
+    if (isCheckbox) {
+        const $checked = [];
+        $(`input[name="${meta.attr.name}"]:checked`).each((i, $obj) => {
+            $checked.push($obj.value);
+        })
+        if ($checked.length === 0) {
+            if (meta.required) {
+                $(`div[id="${event.target.id}"]`).text(`The field ${meta.text} must be specified`);
+            } else {
+                $(`div[id="${event.target.id}"]`).text('');
+            }
+        } else {
+            $(`div[id="${event.target.id}"]`).text('');
+        }
+    } else if (isMultiple) {
+        if($target.val().length === 0) {
+            if(meta.required) {
+                $(`div[id="${event.target.id}"]`).text(`The field ${meta.text} must be specified`);
+            } else {
+                $(`div[id="${event.target.id}"]`).text('');
+            }
+        } else {
+            $(`div[id="${event.target.id}"]`).text('');
+        }
+    } else {
         if ($target.val().trim() === '') {
             if ($target.attr('required')) {
-                $("div#" + $.escapeSelector(event.target.id)).text(`The field ${meta.text} must be specified`);
+                $(`div[id="${event.target.id}"]`).text(`The field ${meta.text} must be specified`);
+            } else {
+                $(`div[id="${event.target.id}"]`).text('');
             }
         } else if (meta.chkFn) {
             if (meta.chkFn($target.val(), meta, meta)) {
-                console.log('match');
+                $(`div[id="${event.target.id}"]`).text('');
             } else {
-                $("div#" + $.escapeSelector(event.target.id)).text(meta.errMsgFn($target.val(), meta, meta));
+                $(`div[id="${event.target.id}"]`).text(meta.errMsgFn ? meta.errMsgFn($target.val(), meta) : `The field ${meta.text} must be specified`);
             }
         } else {
             //no error
+            $(`div[id="${event.target.id}"]`).text('');
         }
-    } else {
-        console.log($target.val());
     }
 
 }
@@ -109,7 +134,7 @@ function inputItems(item, type, attr) {
     const $label = makeElement('label', {for: "ID"}).text(
         (!item.text) ? item.key : item.text
     )
-    const $inputAttr = Object.assign({}, attr || {}, {type: type, value: `${item.key}`, id: "ID"})
+    const $inputAttr = Object.assign({}, attr || {}, {type: type, value: `${item.key}`})
     const $input = makeElement('input', $inputAttr);
 
     return [$label, $input]
@@ -127,28 +152,36 @@ function block(meta, path, $element) {
 }
 
 function form(meta, path, $element) {
-    const $form = items('form', meta, path, $element);
+
+    const $form = items('form', meta, path, $element).attr('noValidate', 'noValidate');
     $form.submit(function (event) {
         event.preventDefault();
         const $form = $(this);
         //@TODO
 
+        $("input,select, textarea").trigger('blur');
+        $("input, select").trigger('change');
 
-        const results = $form.serializeArray().reduce((acc, v) => {
+        if(!$('.error', $form).text()){
+            const results = $form.serializeArray().reduce((acc, v) => {
 
-            const isCheckbox = $(`[name="${v.name}"]`, $form).attr('type') === 'checkbox';
-            const isMultiple = $(`[name="${v.name}"]`, $form).attr('multiple') === 'multiple';
+                const isCheckbox = $(`[name="${v.name}"]`, $form).attr('type') === 'checkbox';
+                const isMultiple = $(`[name="${v.name}"]`, $form).attr('multiple') === 'multiple';
 
-            if(isCheckbox || isMultiple){
-                acc[v.name] =(acc[v.name] || []).concat(v.value);
-            }else {
+                if (isCheckbox || isMultiple) {
+                    acc[v.name] = (acc[v.name] || []).concat(v.value);
+                } else {
 
-                acc[v.name] = v.value;
-            }
+                    acc[v.name] = v.value;
+                }
 
-            return acc;
-        }, {});
-        console.log(JSON.stringify(results, null, 2));
+                return acc;
+            }, {});
+            console.log(JSON.stringify(results, null, 2));
+        }else {
+            console.log('Form not submitted')
+        }
+
     });
 }
 
@@ -171,22 +204,23 @@ function input(meta, path, $element) {
         $e.append(makeElement('div', {class: "error", id: makeId(path)}));
         $element.append($e);
 
-        $textArea.on('blur', typeHandler);
+        $textArea.on('blur', ($event) => {
+            typeHandler($event, meta);
+        });
     } else {
         const $e = makeElement('div', {});
-        const $inputAttr = Object.assign({}, meta.attr || {}, {id: makeId(path)}, {type: meta.subType || 'text', 'required': meta.required});
+        const $inputAttr = Object.assign({}, meta.attr || {}, {id: makeId(path)}, {
+            type: meta.subType || 'text',
+            'required': meta.required
+        });
         const $input = makeElement('input', $inputAttr);
-        // $input.prop('required', meta.required);
-        /*$input.blur((event) => {
-            event.preventDefault();
-            onInputBlurred(event, meta);
-        });*/
+
 
         $e.append($input);
         $e.append(makeElement('div', {class: "error", id: makeId(path)}));
         $element.append($e);
 
-        $input.on('blur', ($event) => {
+        $input.on('blur change', ($event) => {
             typeHandler($event, meta);
         });
     }
@@ -205,9 +239,9 @@ function multiSelect(meta, path, $element) {
     if (meta.items.length > (Meta._options.N_MULTI_SELECT || N_MULTI_SELECT)) {
         $element.append(makeElement('label', {for: makeId(path)}).text((meta.required ? `${meta.text}*` : meta.text)));
         const $e = makeElement('div', {});
-        const $selectAttr = Object.assign({}, meta.attr, {'multiple': true});
+        const $selectAttr = Object.assign({}, meta.attr, {'multiple': true, id: makeId(path)});
         const $select = makeElement('select', $selectAttr).prop('required', meta.required)
-        $select.on('change', ($event) => {
+        $select.on('blur change', ($event) => {
             typeHandler($event, meta);
         });
         $e.append($select);
@@ -221,7 +255,11 @@ function multiSelect(meta, path, $element) {
         const $e = makeElement('div', {});
         const $fieldset = makeElement('div', {class: "fieldset"});
         (meta.items || []).forEach((item) => {
-            const $input = inputItems(item, 'checkbox', meta.attr);
+            const $checkboxAttr = Object.assign({}, meta.attr || {}, {id: makeId(path)});
+            const $input = inputItems(item, 'checkbox', $checkboxAttr);
+            $input[1].on('change', ($event) => {
+                typeHandler($event, meta);
+            });
             $fieldset.append($input[0]).append($input[1]);
         })
         $e.append($fieldset);
@@ -247,7 +285,7 @@ function segment(meta, path, $element) {
 function submit(meta, path, $element) {
     //@TODO
     block(meta, path, $element);
-    const submitAttr = Object.assign({}, {type: 'submit'});
+    const submitAttr = Object.assign({}, meta.attr || {}, {type: 'submit'});
 
     const $e = makeElement('button', submitAttr);
     $e.text(meta.text || 'Submit');
@@ -260,8 +298,9 @@ function uniSelect(meta, path, $element) {
         $element.append(makeElement('label', {for: makeId(path)}).text((meta.required ? `${meta.text}*` : meta.text)));
         const $e = makeElement('div', {});
         $element.append($e);
-        const $select = items('select', meta, path, $element).prop('required', meta.required);
-        $select.on('change', ($event) => {
+        const $selectAttr = Object.assign({}, meta.attr || {}, {'required': meta.required, id: makeId(path)})
+        const $select = makeElement('select', $selectAttr);
+        $select.on('blur change', ($event) => {
             typeHandler($event, meta);
         });
         (meta.items || []).forEach((item) => {
@@ -275,7 +314,8 @@ function uniSelect(meta, path, $element) {
         const $e = makeElement('div', {});
         const $fieldset = makeElement('div', {class: "fieldset"});
         (meta.items || []).forEach((item) => {
-            const $input = inputItems(item, 'radio', meta.attr);
+            const $radioAttr = Object.assign({}, meta.attr || {}, {id: makeId(path)});
+            const $input = inputItems(item, 'radio', $radioAttr);
             $fieldset.append($input[0]).append($input[1]);
         })
         $e.append($fieldset);

@@ -116,7 +116,7 @@ export default {
 	level: '1',
       },
       { type: 'form',
-	attr: { action: 'https://www.google.com/search', },
+	attr: { action: 'https://www.google.com/search'},
 	items: [
 	  { type: 'input',
 	    text: 'Search Terms',
