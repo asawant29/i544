@@ -85,7 +85,7 @@ export default class Model {
         
         
         console.log('Connected successfully to the server');
-        props.db = client.db(DB_NAME);
+        db = client.db(DB_NAME);
         client.close();
         
       });
@@ -109,7 +109,7 @@ export default class Model {
       
     } catch (error) {
       const msg = `Error while closing database: ${error}`;
-      throw [new ModelError('DB', msg)]
+      throw [new ModelError('DB', msg)];
     }
   }
 
@@ -230,3 +230,4 @@ const COUNT = 5;
 
 //define private constants and functions here.
 const DB_NAME = 'books';
+let db;

@@ -24,8 +24,11 @@ export default class Validator {
   validate(act, nameValues) {
     const trimmedNameValues =
       Object.entries(nameValues).map(([k, v]) => {
-	const isUndefOrNull = (v === undefined || v === null);
-  	return isUndefOrNull ? [k, ''] : [k, String(v).trim()];
+  	return (v === undefined || v === null)
+	  ? [k, '']
+	  : typeof v === 'object'
+	  ? [ k, v ]
+	  : [k, String(v).trim()];
       });
     const obj = Object.fromEntries(trimmedNameValues);
     const out = {};
