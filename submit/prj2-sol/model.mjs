@@ -70,10 +70,27 @@ export default class Model {
     let client;
     try {
       //@TODO
+      client = new mongo.MongoClient(dbUrl);
+      
       const props = {
-	validator: new Validator(META),
+  validator: new Validator(META),
 	//@TODO other properties
       };
+      
+      console.log('Client', client);
+      
+      client.connect((err) => {
+        console.log('Error', err);
+        assert.equal(null, err);
+        
+        
+        console.log('Connected successfully to the server');
+        props.db = client.db(DB_NAME);
+        client.close();
+        
+      });
+      console.log('Property', props);
+      
       const model = new Model(props);
       return model;
     }
@@ -88,6 +105,12 @@ export default class Model {
    */
   async close() {
     //@TODO
+    try {
+      
+    } catch (error) {
+      const msg = `Error while closing database: ${error}`;
+      throw [new ModelError('DB', msg)]
+    }
   }
 
   /** Clear out all data stored within this model. */
@@ -206,3 +229,4 @@ const MONGO_CONNECT_OPTIONS = { useUnifiedTopology: true };
 const COUNT = 5;
 
 //define private constants and functions here.
+const DB_NAME = 'books';
