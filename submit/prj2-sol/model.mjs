@@ -65,38 +65,50 @@ export default class Model {
 
   /** Return a new instance of Model set up to use database specified
    *  by dbUrl
-   */ 
+   */
   static async make(dbUrl) {
     let client;
     try {
       //@TODO
-      client = new mongo.MongoClient(dbUrl);
-      
+      client = await mongo.connect(dbUrl, MONGO_CONNECT_OPTIONS);
+
+      const db = client.db(DB_NAME);
+
       const props = {
-  validator: new Validator(META),
-	//@TODO other properties
+        validator: new Validator(META),
+        //@TODO other properties
+        client: client,
+        db: db
       };
-      
-      console.log('Client', client);
-      
-      client.connect((err) => {
-        console.log('Error', err);
-        assert.equal(null, err);
-        
-        
-        console.log('Connected successfully to the server');
-        db = client.db(DB_NAME);
-        client.close();
-        
-      });
-      console.log('Property', props);
-      
+
+      const shopping_cart = await db.collection(COLLECTIONS.SHOPPING_CART);
+      shopping_cart.createIndex({ cartId: 1 });
+      shopping_cart.createIndex({ sku: 1 });
+      shopping_cart.createIndex({ nUnits: 1 });
+      shopping_cart.createIndex({ _lastModified: 1 });
+
+      props.shopping_cart = shopping_cart;
+
+      const bookCatalog = await db.collection(COLLECTIONS.BOOK_CATALOG);
+      bookCatalog.createIndex({ isbn: 1 });
+      bookCatalog.createIndex({ title: 1 });
+      bookCatalog.createIndex({ authors: 1 });
+      bookCatalog.createIndex({ publisher: 1 });
+      bookCatalog.createIndex({ year_published: 1 });
+      bookCatalog.createIndex({ no_of_pages: 1 });
+      bookCatalog.createIndex({ _lastModified: 1 });
+
+      props.bookCatalog = bookCatalog;
+
       const model = new Model(props);
+
+      console.log('Model', model);
+
       return model;
     }
     catch (err) {
       const msg = `cannot connect to URL "${dbUrl}": ${err}`;
-      throw [ new ModelError('DB', msg) ];
+      throw [new ModelError('DB', msg)];
     }
   }
 
@@ -106,7 +118,8 @@ export default class Model {
   async close() {
     //@TODO
     try {
-      
+      await this.client.close();
+
     } catch (error) {
       const msg = `Error while closing database: ${error}`;
       throw [new ModelError('DB', msg)];
@@ -116,8 +129,16 @@ export default class Model {
   /** Clear out all data stored within this model. */
   async clear() {
     //@TODO
+    try {
+      await this.db.collection(COLLECTIONS.SHOPPING_CART).drop();
+      console.log('Database cleared');
+
+    } catch (error) {
+      const msg = `Error while closing database: ${error}`;
+      throw [new ModelError('DB', msg)];
+    }
   }
-  
+
   //Action routines
 
   /** Create a new cart.  Returns ID of newly created cart.  The
@@ -128,9 +149,32 @@ export default class Model {
    *  current Date timestamp.
    */
   async newCart(rawNameValues) {
-    const nameValues = this._validate('newCart', rawNameValues);
-    //@TODO
-    return '@TODO';
+    try {
+      const nameValues = this._validate('newCart', rawNameValues);
+      // console.log('Name Value', nameValues);
+
+
+      randomCounter++;
+      // console.log('This DB', this.db);
+      const shopping_cart = this.db.collection(COLLECTIONS.SHOPPING_CART);
+      const _cart = {
+        cartId: Math.random().toString() + randomCounter,
+        _lastModified: new Date().toISOString()
+      };
+
+      const cartAdded = await shopping_cart.insertOne(_cart);
+      console.log('Cart', _cart, cartAdded);
+      if (cartAdded.insertedId === _cart._id) {
+        console.log('New cart added.');
+        return cartAdded.insertedId;
+      }
+      return null;
+    } catch (err) {
+      const msg = `Error while closing database: ${err}`;
+      throw [new ModelError('DB', msg)];
+
+    }
+
   }
 
   /** Given fields { cartId, sku, nUnits } = rawNameValues, update
@@ -143,9 +187,36 @@ export default class Model {
    */
   async cartItem(rawNameValues) {
     const nameValues = this._validate('cartItem', rawNameValues);
+
     //@TODO
+    const cartTable = this.db.collection(COLLECTIONS.SHOPPING_CART);
+    try {
+      const matched = await cartTable.updateOne(
+        {
+          cartId: nameValues.cartId.toString()
+        },
+        {
+          $set: {
+            sku: nameValues.sku,
+            nUnits: nameValues.nUnits,
+            _lastModified: new Date().toISOString()
+          }
+        }
+      );
+
+      console.log('Update', matched, matched.matchedCount);
+      if (matchedCount != 1) {
+        const msg = `BAD_ID`;
+        throw [new ModelError('DB', msg)]
+      }
+
+    } catch (err) {
+
+    }
+
+
   }
-  
+
   /** Given fields { cartId } = nameValues, return cart identified by
    *  cartId.  The cart is returned as an object which contains a
    *  mapping from SKU's to *positive* integers (representing the
@@ -160,7 +231,19 @@ export default class Model {
   async getCart(rawNameValues) {
     const nameValues = this._validate('getCart', rawNameValues);
     //@TODO
-    return {};
+    const cartCursor = await this.db.collection(COLLECTIONS.SHOPPING_CART).findOne(
+      {
+        cartId: rawNameValues.cartId.toString(),
+        nUnits: { $gt: 0 }
+      });
+    console.log('Cursor', cartCursor);
+
+    if (cartCursor) {
+      return { _lastModified: cartCursor._lastModified };
+    } else {
+      throw [new ModelError('DB', 'BAD_ID')]
+    }
+
   }
 
   /** Given fields { isbn, title, authors, publisher, year, pages } =
@@ -177,6 +260,31 @@ export default class Model {
   async addBook(rawNameValues) {
     const nameValues = this._validate('addBook', rawNameValues);
     //@TODO
+    try {
+      // const matched = await this.db.collection(COLLECTIONS.BOOK_CATALOG).updateOne(
+      //   {
+      //     isbn: nameValues.isbn
+      //   },
+      //   {
+      //     $set: {
+      //       title: nameValues.title,
+      //       authors: nameValues.authors,
+      //       publisher: nameValues.publisher,
+      //       year: nameValues.year,
+      //       no_of_pages: nameValues.pages,
+      //       _lastModified: new Date().toISOString()
+      //     }
+      //   },
+      //   {
+      //     "upsert": true
+      //   }
+      // );
+
+      // console.log('Match', matched);
+    } catch (err) {
+
+    }
+
   }
 
   /** Given fields { isbn, authorsTitle, _count=COUNT, _index=0 } =
@@ -206,10 +314,10 @@ export default class Model {
     }
     catch (err) {
       if (err instanceof Array) { //something we understand
-	errs = err;
+        errs = err;
       }
       else {
-	throw err; //not expected, throw upstairs
+        throw err; //not expected, throw upstairs
       }
     }
     if (rawNameValues._id !== undefined) {
@@ -218,8 +326,8 @@ export default class Model {
     if (errs.length > 0) throw errs;
     return nameValues;
   }
-  
-  
+
+
 };
 
 //use as second argument to mongo.connect()
@@ -230,4 +338,23 @@ const COUNT = 5;
 
 //define private constants and functions here.
 const DB_NAME = 'books';
-let db;
+let randomCounter = 0;
+const COLLECTIONS = {
+  SHOPPING_CART: "shopping_cart",
+  BOOK_CATALOG: "book_catalog"
+}
+
+const SHOPPING_FIELD = {
+  CART_ID: "cartId",
+  SKU: 'sku',
+  NUNITS: 'nUnits'
+}
+
+const BOOK_FIELD = {
+  ISBN: 'isbn',
+  TITLE: 'title',
+  AUTHORS: 'authors',
+  PUBLISHER: 'publisher',
+  YEAR_PUBLISHED: 'year_published',
+  PAGES: 'no_of_pages'
+}
