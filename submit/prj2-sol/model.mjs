@@ -102,7 +102,7 @@ export default class Model {
 
       const model = new Model(props);
 
-      console.log('Model', model);
+      // console.log('Model', model);
 
       return model;
     }
@@ -131,6 +131,8 @@ export default class Model {
     //@TODO
     try {
       await this.db.collection(COLLECTIONS.SHOPPING_CART).drop();
+      await this.db.collection(COLLECTIONS.BOOK_CATALOG).drop();
+      this.db.dropDatabase();
       console.log('Database cleared');
 
     } catch (error) {
@@ -152,8 +154,6 @@ export default class Model {
     try {
       const nameValues = this._validate('newCart', rawNameValues);
       // console.log('Name Value', nameValues);
-
-
       randomCounter++;
       // console.log('This DB', this.db);
       const shopping_cart = this.db.collection(COLLECTIONS.SHOPPING_CART);
@@ -166,7 +166,7 @@ export default class Model {
       console.log('Cart', _cart, cartAdded);
       if (cartAdded.insertedId === _cart._id) {
         console.log('New cart added.');
-        return cartAdded.insertedId;
+        return _cart.cartId;
       }
       return null;
     } catch (err) {
@@ -186,32 +186,48 @@ export default class Model {
    *            sku does not specify the isbn of an existing book.
    */
   async cartItem(rawNameValues) {
-    const nameValues = this._validate('cartItem', rawNameValues);
 
     //@TODO
-    const cartTable = this.db.collection(COLLECTIONS.SHOPPING_CART);
+
     try {
-      const matched = await cartTable.updateOne(
-        {
-          cartId: nameValues.cartId.toString()
-        },
-        {
-          $set: {
-            sku: nameValues.sku,
-            nUnits: nameValues.nUnits,
-            _lastModified: new Date().toISOString()
+      const nameValues = this._validate('cartItem', rawNameValues);
+
+      const cartTable = this.db.collection(COLLECTIONS.SHOPPING_CART);
+      const cursor = await this.findBooks({ isbn: nameValues.sku });
+      // console.log('SKU', cursor[0].isbn, nameValues.sku);
+      if (cursor[0].isbn === nameValues.sku) {
+        const matched = await cartTable.updateOne(
+          {
+            cartId: nameValues.cartId.toString()
+          },
+          {
+            $set: {
+              sku: nameValues.nUnits > 0 ? nameValues.sku : {},
+              nUnits: nameValues.nUnits,
+              _lastModified: new Date().toISOString()
+            }
           }
+        );
+
+        console.log('Update', matched, matched.matchedCount);
+        if (matchedCount != 1) {
+
+
+          const msg = `BAD_ID`;
+          throw [new ModelError('BAD_ID', msg)]
+        } else {
+          console.log('Updated');
+
         }
-      );
+      } else {
 
-      console.log('Update', matched, matched.matchedCount);
-      if (matchedCount != 1) {
-        const msg = `BAD_ID`;
-        throw [new ModelError('DB', msg)]
+        const msg = `unknown sku ${nameValues.sku}`;
+        throw [new ModelError('BAD_ID', msg, 'sku')];
       }
-
     } catch (err) {
 
+      const msg = `unknown sku ${err}`;
+      throw [new ModelError('BAD_ID', msg, 'sku')];
     }
 
 
@@ -231,18 +247,24 @@ export default class Model {
   async getCart(rawNameValues) {
     const nameValues = this._validate('getCart', rawNameValues);
     //@TODO
-    const cartCursor = await this.db.collection(COLLECTIONS.SHOPPING_CART).findOne(
-      {
-        cartId: rawNameValues.cartId.toString(),
-        nUnits: { $gt: 0 }
-      });
-    console.log('Cursor', cartCursor);
+    try {
+      const cartCursor = await this.db.collection(COLLECTIONS.SHOPPING_CART).findOne(
+        {
+          cartId: nameValues.cartId.toString(),
+          nUnits: { $gt: 0 }
+        });
+      console.log('Cursor', cartCursor);
 
-    if (cartCursor) {
-      return { _lastModified: cartCursor._lastModified };
-    } else {
-      throw [new ModelError('DB', 'BAD_ID')]
+      if (cartCursor) {
+        return { _lastModified: cartCursor._lastModified, [cartCursor.sku]: cartCursor.nUnits };
+      } else {
+        throw [new ModelError('DB', 'BAD_ID')];
+      }
+    } catch (err) {
+      const msg = `${nameValues.cartId} does not reference a cart`
+      throw [new ModelError('BAD_ID', msg)];
     }
+
 
   }
 
@@ -259,28 +281,30 @@ export default class Model {
    */
   async addBook(rawNameValues) {
     const nameValues = this._validate('addBook', rawNameValues);
+    // console.log('Add Book', nameValues);
+
     //@TODO
     try {
-      // const matched = await this.db.collection(COLLECTIONS.BOOK_CATALOG).updateOne(
-      //   {
-      //     isbn: nameValues.isbn
-      //   },
-      //   {
-      //     $set: {
-      //       title: nameValues.title,
-      //       authors: nameValues.authors,
-      //       publisher: nameValues.publisher,
-      //       year: nameValues.year,
-      //       no_of_pages: nameValues.pages,
-      //       _lastModified: new Date().toISOString()
-      //     }
-      //   },
-      //   {
-      //     "upsert": true
-      //   }
-      // );
+      const matched = await this.db.collection(COLLECTIONS.BOOK_CATALOG).updateOne(
+        {
+          isbn: nameValues.isbn
+        },
+        {
+          $set: {
+            title: nameValues.title,
+            authors: nameValues.authors,
+            publisher: nameValues.publisher,
+            year: nameValues.year,
+            no_of_pages: nameValues.pages,
+            _lastModified: new Date().toISOString()
+          }
+        },
+        {
+          "upsert": true
+        }
+      );
 
-      // console.log('Match', matched);
+      console.log('Match', matched);
     } catch (err) {
 
     }
@@ -299,9 +323,30 @@ export default class Model {
    *  Will return [] if no books match the search criteria.
    */
   async findBooks(rawNameValues) {
-    const nameValues = this._validate('findBooks', rawNameValues);
-    //@TODO
-    return [];
+    try {
+      const nameValues = this._validate('findBooks', rawNameValues);
+      //@TODO
+      console.log('find books', nameValues);
+
+      const cursor = await this.db.collection(COLLECTIONS.BOOK_CATALOG).find(
+        {isbn: nameValues.isbn,
+          $or: [
+
+            { title: new RegExp('\\b' + nameValues.authorsTitle + '\\b') },
+            { authors: [`${nameValues.authorsTitle}`] },
+          ],
+          
+        },,
+        {
+          limit: Number(COUNT || nameValues._count),
+          min: 0 || nameValues._index
+        }
+       
+      ).toArray();
+      return cursor || [];
+    } catch (err) {
+
+    }
   }
 
   //wrapper around this.validator to verify that no external field
