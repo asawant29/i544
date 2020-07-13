@@ -82,27 +82,27 @@ export default class Model {
       };
 
       const shopping_cart = await db.collection(COLLECTIONS.SHOPPING_CART);
-      shopping_cart.createIndex({ cartId: 1 });
-      shopping_cart.createIndex({ sku: 1 });
-      shopping_cart.createIndex({ nUnits: 1 });
-      shopping_cart.createIndex({ _lastModified: 1 });
+      await shopping_cart.createIndex({ cartId: 1 });
+      await shopping_cart.createIndex({ sku: 1 });
+      await shopping_cart.createIndex({ nUnits: 1 });
+      await shopping_cart.createIndex({ _lastModified: 1 });
 
       props.shopping_cart = shopping_cart;
 
       const bookCatalog = await db.collection(COLLECTIONS.BOOK_CATALOG);
-      bookCatalog.createIndex({ isbn: 1 });
-      bookCatalog.createIndex({ title: 1 });
-      bookCatalog.createIndex({ authors: 1 });
-      bookCatalog.createIndex({ publisher: 1 });
-      bookCatalog.createIndex({ year_published: 1 });
-      bookCatalog.createIndex({ no_of_pages: 1 });
-      bookCatalog.createIndex({ _lastModified: 1 });
+      await bookCatalog.createIndex({ isbn: 1 });
+      await bookCatalog.createIndex({ title: 1 });
+      await bookCatalog.createIndex({ authors: 1 });
+      await bookCatalog.createIndex({ publisher: 1 });
+      await bookCatalog.createIndex({ year_published: 1 });
+      await bookCatalog.createIndex({ no_of_pages: 1 });
+      await bookCatalog.createIndex({ _lastModified: 1 });
 
       props.bookCatalog = bookCatalog;
 
       const model = new Model(props);
 
-      // console.log('Model', model);
+
 
       return model;
     }
@@ -163,13 +163,15 @@ export default class Model {
       };
 
       const cartAdded = await shopping_cart.insertOne(_cart);
-      console.log('Cart', _cart, cartAdded);
+
       if (cartAdded.insertedId === _cart._id) {
         console.log('New cart added.');
         return _cart.cartId;
       }
       return null;
     } catch (err) {
+      console.log('Caught error', err);
+
       const msg = `Error while closing database: ${err}`;
       throw [new ModelError('DB', msg)];
 
@@ -209,8 +211,7 @@ export default class Model {
           }
         );
 
-        console.log('Update', matched, matched.matchedCount);
-        if (matchedCount != 1) {
+        if (matched.matchedCount != 1) {
 
 
           const msg = `BAD_ID`;
@@ -251,13 +252,19 @@ export default class Model {
       const cartCursor = await this.db.collection(COLLECTIONS.SHOPPING_CART).findOne(
         {
           cartId: nameValues.cartId.toString(),
-          nUnits: { $gt: 0 }
+
+          nUnits: { $ne: ['nUnits', 0, undefined] }
+
         });
-      console.log('Cursor', cartCursor);
+
+      console.log('Cart cursor', cartCursor);
+
 
       if (cartCursor) {
         return { _lastModified: cartCursor._lastModified, [cartCursor.sku]: cartCursor.nUnits };
       } else {
+        console.log('Here');
+
         throw [new ModelError('DB', 'BAD_ID')];
       }
     } catch (err) {
@@ -287,7 +294,7 @@ export default class Model {
     try {
       const matched = await this.db.collection(COLLECTIONS.BOOK_CATALOG).updateOne(
         {
-          isbn: nameValues.isbn
+          isbn: nameValues.isbn.toString()
         },
         {
           $set: {
@@ -303,9 +310,14 @@ export default class Model {
           "upsert": true
         }
       );
+      // console.log('Add book', matched);
 
-      console.log('Match', matched);
+      if (matched.matchedCount != 1) {
+        return null;
+      }
+      return nameValues.isbn;
     } catch (err) {
+      console.log('Caught here', err);
 
     }
 
@@ -326,25 +338,19 @@ export default class Model {
     try {
       const nameValues = this._validate('findBooks', rawNameValues);
       //@TODO
-      console.log('find books', nameValues);
 
-      const cursor = await this.db.collection(COLLECTIONS.BOOK_CATALOG).find(
-        {isbn: nameValues.isbn,
-          $or: [
+      const authorsTitle = new RegExp(`^.*${nameValues.authorsTitleSearch}.*$`);
 
-            { title: new RegExp('\\b' + nameValues.authorsTitle + '\\b') },
-            { authors: [`${nameValues.authorsTitle}`] },
-          ],
-          
-        },,
-        {
-          limit: Number(COUNT || nameValues._count),
-          min: 0 || nameValues._index
-        }
-       
-      ).toArray();
+      const customFilter = nameValues.isbn ? {
+        isbn: nameValues.isbn.toString()
+      } : { title: { $regex: authorsTitle } }
+
+      const cursor = await this.db.collection(COLLECTIONS.BOOK_CATALOG).find(customFilter)
+        .sort({ 'title': 1 }).limit(COUNT || _count).toArray();
+
       return cursor || [];
     } catch (err) {
+      throw [new ModelError('BAD_ID', err)];
 
     }
   }
