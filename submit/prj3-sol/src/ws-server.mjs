@@ -164,7 +164,10 @@ function doGetCart(app) {
 
       console.log(result);
       res.send(response);
-    } catch (error) {}
+    } catch (error) {
+      const mapped = mapError(error);
+      res.status(mapped.status).json(mapped);
+    }
   };
 }
 
@@ -219,7 +222,7 @@ function doFindBooks(app) {
         const prevHref = [];
         prevHref.push(`${req.baseUrl}/${BOOK}?`);
         const q = Object.assign({}, req.query);
-        q._index = +q._index - 5;
+        q._index = +(q._index - +requestedCount) < 0 ? 0 : +(q._index - +requestedCount)
 
         for (const key in q) {
           prevHref.push(`${key}=${q[key]}`);
@@ -242,7 +245,7 @@ function doFindBooks(app) {
         const nextHref = [];
         nextHref.push(`${req.baseUrl}/${BOOK}?`);
         const q = Object.assign({}, req.query);
-        q._index = query._index + 5;
+        q._index = +query._index + +requestedCount;
 
         for (const key in q) {
           nextHref.push(`${key}=${q[key]}`);
@@ -260,7 +263,7 @@ function doFindBooks(app) {
       // console.log(query);
     } catch (error) {
       console.log("Error", error);
-      mapError(error);
+      const mapped = mapError(error);
       res.status(mapped.status).json(mapped);
     }
   };
