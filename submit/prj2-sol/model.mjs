@@ -391,8 +391,8 @@ const COUNT = 5;
 const DB_NAME = 'books';
 let randomCounter = 0;
 const COLLECTIONS = {
-  SHOPPING_CART: "shopping_cart",
-  BOOK_CATALOG: "book_catalog"
+  SHOPPING_CART: "carts",
+  BOOK_CATALOG: "books"
 }
 
 const SHOPPING_FIELD = {

@@ -27,7 +27,7 @@ and an error message which should be as specific as possible.  If the
 error is associated with a particular field, then the internal name of
 that field should be filled in to the ModelError object.  Note that if
 an error message refers to the name of the field, it should do so
-using the external name (`label`) of the field.
+using the external name (`title`) of the field.
 
 The codes for the ModelError include the following:
 
@@ -63,16 +63,22 @@ export default class Model {
     Object.assign(this, props);
   }
 
+  get DEFAULT_COUNT() { return COUNT; }
+
   /** Return a new instance of Model set up to use database specified
    *  by dbUrl
    */ 
   static async make(dbUrl) {
     let client;
     try {
-      //@TODO
+      client = await mongo.connect(dbUrl, MONGO_CONNECT_OPTIONS );
+      const db = client.db();
+      const books = db.collection(BOOKS);
+      const carts = db.collection(CARTS);
+      await books.createIndex({ title: 'text', authors: 'text', });
       const props = {
+	client, db, books, carts, meta: META,
 	validator: new Validator(META),
-	//@TODO other properties
       };
       const model = new Model(props);
       return model;
@@ -87,12 +93,18 @@ export default class Model {
    *  close any database connections.
    */
   async close() {
-    //@TODO
+    await this.client.close();
   }
 
   /** Clear out all data stored within this model. */
   async clear() {
-    //@TODO
+    try {
+      await this.books.deleteMany({});
+      await this.carts.deleteMany({});
+    }
+    catch (err) {
+      throw [ new ModelError('DB', err.message || err.toString()) ];
+    }
   }
   
   //Action routines
@@ -106,8 +118,14 @@ export default class Model {
    */
   async newCart(rawNameValues) {
     const nameValues = this._validate('newCart', rawNameValues);
-    //@TODO
-    return '@TODO';
+    try {
+      const _id = String((await this.carts.countDocuments({})) + Math.random());
+      await this.carts.insertOne({_id, _lastModified: new Date(), });
+      return _id;
+    }
+    catch (err) {
+      throw [ new ModelError('DB', err.message || err.toString()) ];
+    }
   }
 
   /** Given fields { cartId, sku, nUnits } = rawNameValues, update
@@ -120,7 +138,26 @@ export default class Model {
    */
   async cartItem(rawNameValues) {
     const nameValues = this._validate('cartItem', rawNameValues);
-    //@TODO
+    try {
+      const { cartId: _id, sku, nUnits } = nameValues;
+      const books = await this.findBooks({isbn: sku});
+      if (books.length !== 1) {
+	throw [ new ModelError('BAD_ID', `unknown sku ${sku}`, 'sku'), ];
+      }
+      const update = {
+	$currentDate: { _lastModified: true, },
+	$set: { [sku]: nUnits }
+      };
+      const result = await this.carts.updateOne({ _id, }, update);
+      if (result.matchedCount !== 1) {
+	const msg = `no updates for cart "${_id}"`;
+	throw [ new ModelError('BAD_ID', msg, 'cartId'), ];
+      }
+    }
+    catch (err) {
+      if (err instanceof Array) throw err;
+      throw [ new ModelError('DB', err.message || err.toString()) ];
+    }
   }
   
   /** Given fields { cartId } = nameValues, return cart identified by
@@ -136,7 +173,21 @@ export default class Model {
    */
   async getCart(rawNameValues) {
     const nameValues = this._validate('getCart', rawNameValues);
-    //@TODO
+    try {
+      const { cartId: _id, } = nameValues;
+      const result = await this.carts.findOne({_id});
+      if (result === null) {
+	const msg = `cannot find cart "${_id}"`;
+	throw [ new ModelError('BAD_ID', msg, 'cartId'), ];
+      }
+      const items =
+        Object.entries(result).filter(([k, v]) => k !== '_id' && v > 0);
+      return Object.fromEntries(items);
+    }
+    catch (err) {
+      if (err instanceof Array) throw err;
+      throw [ new ModelError('DB', err.message || err.toString()) ];
+    }
     return {};
   }
 
@@ -153,7 +204,16 @@ export default class Model {
    */
   async addBook(rawNameValues) {
     const nameValues = this._validate('addBook', rawNameValues);
-    //@TODO
+    try {
+      const _id = nameValues.isbn;
+      const extras = { _id, _lastModified: new Date(), };
+      const data = Object.assign({}, nameValues, extras);
+      await this.books.updateOne({_id}, {$set: data}, { upsert: true });
+      return _id;
+    }
+    catch (err) {
+      throw [ new ModelError('DB', err.message || err.toString()) ];
+    }
   }
 
   /** Given fields { isbn, authorsTitle, _count=COUNT, _index=0 } =
@@ -169,8 +229,27 @@ export default class Model {
    */
   async findBooks(rawNameValues) {
     const nameValues = this._validate('findBooks', rawNameValues);
-    //@TODO
-    return [];
+    try {
+      const query = {};
+      const { authorsTitleSearch: $search, isbn: _id } = nameValues;
+      if ($search !== undefined) query.$text = { $search, };
+      if (_id !== undefined) query._id = _id;
+      const index =
+	nameValues._index !== undefined ? Number(nameValues._index) : 0;
+      const count =
+        nameValues._count !== undefined ? Number(nameValues._count) : COUNT;
+      const cursor =
+	await this.books.
+	find(query).
+	sort({title: 1 }).
+        skip(index).
+        limit(count);
+      const results = await cursor.toArray();
+      return results.map(obj => { const { _id, ...o } = obj; return o; });
+    }
+    catch (err) {
+      throw [ new ModelError('DB', err.message || err.toString()) ];
+    }
   }
 
   //wrapper around this.validator to verify that no external field
@@ -196,7 +275,6 @@ export default class Model {
     return nameValues;
   }
   
-  
 };
 
 //use as second argument to mongo.connect()
@@ -206,3 +284,6 @@ const MONGO_CONNECT_OPTIONS = { useUnifiedTopology: true };
 const COUNT = 5;
 
 //define private constants and functions here.
+
+const CARTS = 'carts';
+const BOOKS = 'books';
