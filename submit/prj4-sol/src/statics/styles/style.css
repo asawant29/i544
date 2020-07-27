@@ -1,0 +1,83 @@
+:root {
+  --base-color: 0, 0, 192;
+  --color09: rgb(var(--base-color));
+  --color01: rgba(var(--base-color), 0.05);
+  --color02: rgba(var(--base-color), 0.1);
+  --color03: rgba(var(--base-color), 0.15);
+  --color04: rgba(var(--base-color), 0.3);
+  --max-width: 800px;
+}
+
+body {
+  color: var(--color09);
+  background-color: var(--color01);
+  max-width: var(--max-width);
+}
+
+input, button, .select {
+  font-size: inherit;
+  color: var(--color09);
+}
+
+.result, .line-item {
+  border: 2px solid var(--color04);
+  padding: 5px;
+  margin: 5px;
+}
+
+.book {
+  padding: 5px 0px;
+}
+
+.book .title {
+  font-size: 120%;
+  font-weight: bold;
+  font-style: italic;
+  display: block;
+}
+
+.book .authors,
+.book .isbn,
+.book .publisher {
+  display: block;
+}
+
+.book label {
+  padding: 0pt;
+}
+
+.buy, .nUnits {
+  font-size: 150%;
+  padding: 10px;
+  text-align: right;
+}
+
+.search {
+  font-size: 150%;
+  padding: 10px;
+  padding: 2px solid var(--color04);
+}
+
+.scroll {
+  font-size: 120%;
+  padding: 10pt 0pt;
+  width: 100%;
+}
+
+.scroll a[rel="prev"] {
+  float: left;
+}
+.scroll a[rel="next"] {
+  float: right;
+}
+
+label {
+  font-weight: bold;
+  padding: 10px;
+}
+
+.error {
+  color: red;
+  display: block;
+}
+
